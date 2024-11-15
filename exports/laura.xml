@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<carnet>
+    <id>4</id>
+    <fechaexp>2024-10-29</fechaexp>
+    <expedidoen>gijon</expedidoen>
+    <peregrino>
+        <nombre>laura</nombre>
+        <nacionalidad>hr</nacionalidad>
+    </peregrino>
+    <hoy>2024-10-29</hoy>
+    <distanciatotal>0,0</distanciatotal>
+    <paradas>
+        <parada>
+            <orden>1</orden>
+            <nombre>gijon</nombre>
+            <region>g</region>
+        </parada>
+    </paradas>
+    <estancias/>
+</carnet>
