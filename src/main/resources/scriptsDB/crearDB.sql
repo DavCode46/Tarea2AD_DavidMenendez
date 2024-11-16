@@ -1,3 +1,5 @@
+DROP DATABASE IF EXISTS bdperegrinos_DavidMenendez;
+
 -- Creación de la base de datos
 CREATE DATABASE IF NOT EXISTS bdperegrinos_DavidMenendez;
 USE bdperegrinos_DavidMenendez;
@@ -54,13 +56,14 @@ CREATE TABLE Estancias (
 
 -- Tabla Peregrinos_Paradas (N:M)
 CREATE TABLE Peregrinos_Paradas (
-	id_peregrino BIGINT AUTO_INCREMENT,
-	id_parada BIGINT AUTO_INCREMENT,
-	fecha DATE NOT NULL,
-	PRIMARY KEY (id_peregrino, id_parada),
-	FOREIGN KEY (id_peregrino) REFERENCES Peregrinos(id),
-	FOREIGN KEY (id_parada) REFERENCES Paradas(id)
+    id_peregrino BIGINT,
+    id_parada BIGINT,
+    fecha DATE NOT NULL,
+    PRIMARY KEY (id_peregrino, id_parada, fecha), 
+    FOREIGN KEY (id_peregrino) REFERENCES Peregrinos(id),
+    FOREIGN KEY (id_parada) REFERENCES Paradas(id)
 );
+
 
 
 -- Insertar datos en la tabla Usuarios

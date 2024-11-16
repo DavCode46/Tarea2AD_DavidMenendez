@@ -17,6 +17,7 @@ public class Parada implements Serializable{
 	private String nombre;
 	private char region;
 	private String responsable;
+	private Long idUsuario;
 	private List<Peregrino> peregrinos = new ArrayList<Peregrino>();
 
 	public Parada() {
@@ -70,10 +71,18 @@ public class Parada implements Serializable{
 	public void setPeregrinos(List<Peregrino> peregrinos) {
 		this.peregrinos = peregrinos;
 	}
+	
+	public Long getIdUsuario() {
+		return idUsuario;
+	}
+	
+	public void setIdUsuario(Long idUsuario) {
+		this.idUsuario = idUsuario;
+	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, nombre, peregrinos, region, responsable);
+		return Objects.hash(id, idUsuario, nombre, peregrinos, region, responsable);
 	}
 
 	@Override
@@ -85,16 +94,15 @@ public class Parada implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		Parada other = (Parada) obj;
-		return Objects.equals(id, other.id) && Objects.equals(nombre, other.nombre)
-				&& Objects.equals(peregrinos, other.peregrinos) && region == other.region
-				&& Objects.equals(responsable, other.responsable);
+		return Objects.equals(id, other.id) && Objects.equals(idUsuario, other.idUsuario)
+				&& Objects.equals(nombre, other.nombre) && Objects.equals(peregrinos, other.peregrinos)
+				&& region == other.region && Objects.equals(responsable, other.responsable);
 	}
 
 	@Override
 	public String toString() {
-	    return "Parada [id=" + id + ", nombre=" + nombre + ", region=" + region + ", responsable=" + responsable + 
-	           ", cantidad de peregrinos=" + peregrinos.size() + "]";  
+		return "Parada [id=" + id + ", nombre=" + nombre + ", region=" + region + ", responsable=" + responsable
+				+ ", idUsuario=" + idUsuario + ", peregrinos=" + peregrinos + "]";
 	}
-
 
 }
