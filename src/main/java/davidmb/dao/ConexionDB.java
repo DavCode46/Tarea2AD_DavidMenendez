@@ -1,7 +1,13 @@
 package davidmb.dao;
 
-import java.io.*;
-import java.sql.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -47,13 +53,17 @@ public class ConexionDB implements AutoCloseable {
 	}
 
 	public synchronized Connection getConexion() {
-		if (conexion == null) {
-			try {
+		try {
+			if (conexion == null || conexion.isClosed()) { 
+
 				conexion = DriverManager.getConnection(url, user, password);
 				logger.info("Conexión establecida con la base de datos");
-			} catch (SQLException e) {
-				logger.severe("Error al conectar a la base de datos: " + e.getMessage());
 			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.severe("Error al conectar a la base de datos: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return conexion;
 	}

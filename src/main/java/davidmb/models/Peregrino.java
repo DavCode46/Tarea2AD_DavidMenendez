@@ -31,9 +31,8 @@ public class Peregrino {
 		super();
 	}
 
-	public Peregrino(Long id, String nombre, String nacionalidad, Carnet carnet, Long idUsuario) {
+	public Peregrino(String nombre, String nacionalidad, Carnet carnet, Long idUsuario) {
 		super();
-		this.id = id;
 		this.nombre = nombre;
 		this.nacionalidad = nacionalidad;
 		this.carnet = carnet;

@@ -10,17 +10,20 @@ import java.util.List;
 import davidmb.models.Carnet;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
+import davidmb.models.Usuario;
 
 public class PeregrinoDAO {
 
 	ConexionDB con = ConexionDB.getInstancia();
 	
 
-	public void insertar(Peregrino peregrino) {
+	public boolean insertar(Peregrino peregrino) {
 	    // Consultas SQL
 	    String sqlPeregrino = "INSERT INTO Peregrinos (nombre, nacionalidad, id_carnet, id_usuario) VALUES (?, ?, ?, ?)";
-	    String sqlCarnet = "SELECT MAX(id_carnet) FROM CARNETS"; 
-	    String sqlUsuario = "SELECT MAX(id_usuario) FROM USUARIOS"; 
+	    String sqlCarnet = "SELECT MAX(id) FROM CARNETS"; 
+	    String sqlUsuario = "SELECT MAX(id) FROM USUARIOS"; 
+	    
+	    boolean ret = false;
 	    
 	    try (Connection connection = con.getConexion();
 	         PreparedStatement carnetstmt = connection.prepareStatement(sqlCarnet);
@@ -28,18 +31,21 @@ public class PeregrinoDAO {
 	         PreparedStatement peregrinostmt = connection.prepareStatement(sqlPeregrino)) {
 	        
 	        // Obtener el siguiente ID de carnet
-	        int nextCarnetId = 1; 
+	        Long nextCarnetId = 1L; 
 	        try (ResultSet rs = carnetstmt.executeQuery()) {
 	            if (rs.next()) {
-	                nextCarnetId = rs.getInt(1) + 1; 
+	                nextCarnetId = rs.getLong(1); 
 	            }
-	        }
+			} catch (SQLException e) {
+				e.printStackTrace();
+				
+			}
 	        
 	        // Obtener el siguiente ID de usuario
-	        int nextUsuarioId = 1; 
+	        Long nextUsuarioId = 1L; 
 	        try (ResultSet rs = usuariostmt.executeQuery()) {
 	            if (rs.next()) {
-	                nextUsuarioId = rs.getInt(1) + 1; 
+	                nextUsuarioId = rs.getLong(1); 
 	            }
 	        }
 	        
@@ -51,10 +57,12 @@ public class PeregrinoDAO {
 	        
 	        int rowsAffected = peregrinostmt.executeUpdate();
 	        System.out.println("Peregrino insertado, filas afectadas: " + rowsAffected);
+	        ret = true;
 	        
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
+	    return ret;
 	}
 
 
@@ -225,11 +233,35 @@ public class PeregrinoDAO {
 	
 	public static void main(String[] args) {
 		PeregrinoDAO peregrino = new PeregrinoDAO();
+		UsuarioDAO usuarioDAO = new UsuarioDAO();
+		CarnetDAO carnetDAO = new CarnetDAO();
+		
+	    Carnet carnet = new Carnet();
+	    carnet.setParadaInicial(new Parada(1L, "Parada Inicial", 'N', "Responsable")); 
+	    carnetDAO.insertar(carnet);
+	    
+	    Usuario usuario = new Usuario("david", "david", "peregrino");
+	    usuarioDAO.insertar(usuario);
+	    
+	    
+	    
+	  
+	    Peregrino p = new Peregrino("David", "Español", carnet, 0L); 
+	    
+	
+	    boolean resultado = peregrino.insertar(p);
+	    
+	  
+	    if (resultado) {
+	        System.out.println("El peregrino fue insertado correctamente.");
+	    } else {
+	        System.out.println("Hubo un error al insertar el peregrino.");
+	    }
 		//Peregrino p = peregrino.obtenerPorId(1L);
-		List<Peregrino> listaPeregrinos = peregrino.obtenerTodos();
-		for(Peregrino p : listaPeregrinos) {
-			System.out.println(p);
-		}
+//		List<Peregrino> listaPeregrinos = peregrino.obtenerTodos();
+//		for(Peregrino p : listaPeregrinos) {
+//			System.out.println(p);
+//		}
 	//	System.out.println(p);
 		
 		

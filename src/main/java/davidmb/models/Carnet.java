@@ -19,9 +19,8 @@ public class Carnet {
 		super();
 	}
 
-	public Carnet(Long id, Parada paradaInicial) {
+	public Carnet(Parada paradaInicial) {
 		super();
-		this.id = id;
 		this.paradaInicial = paradaInicial;
 	}
 	
