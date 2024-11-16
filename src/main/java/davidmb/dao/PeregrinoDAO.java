@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import davidmb.models.Carnet;
 import davidmb.models.Parada;
@@ -17,13 +18,13 @@ public class PeregrinoDAO {
 	ConexionDB con = ConexionDB.getInstancia();
 	
 
-	public boolean insertar(Peregrino peregrino) {
+	public Optional<Long> insertarPeregrino(Peregrino peregrino) {
 	    // Consultas SQL
 	    String sqlPeregrino = "INSERT INTO Peregrinos (nombre, nacionalidad, id_carnet, id_usuario) VALUES (?, ?, ?, ?)";
 	    String sqlCarnet = "SELECT MAX(id) FROM CARNETS"; 
 	    String sqlUsuario = "SELECT MAX(id) FROM USUARIOS"; 
 	    
-	    boolean ret = false;
+	    
 	    
 	    try (Connection connection = con.getConexion();
 	         PreparedStatement carnetstmt = connection.prepareStatement(sqlCarnet);
@@ -57,16 +58,23 @@ public class PeregrinoDAO {
 	        
 	        int rowsAffected = peregrinostmt.executeUpdate();
 	        System.out.println("Peregrino insertado, filas afectadas: " + rowsAffected);
-	        ret = true;
+	        return Optional.of(nextUsuarioId);
+	        
+	        // Al llamar al método debe manejar el Optional de la siguiente manera
+//	        if (result.isPresent()) {
+//	            System.out.println("Peregrino insertado con éxito. ID Usuario: " + result.get());
+//	        } else {
+//	            System.out.println("Error al insertar el peregrino.");
+//	        }
 	        
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    }
-	    return ret;
+	    return Optional.empty();
 	}
 
 
-	public Peregrino obtenerPorId(Long id) {
+	public Peregrino obtenerPeregrinoPorId(Long id) {
 	    String sqlPeregrino = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_carnet, p.id_usuario, " +
 	                          "c.id AS carnet_id, c.parada_inicial, c.fechaexp, c.distancia, c.nvips, " +
 	                          "pa.id AS parada_id, pa.nombre AS parada_nombre, pa.region, pa.responsable " +
@@ -150,7 +158,7 @@ public class PeregrinoDAO {
 
 
 
-	public List<Peregrino> obtenerTodos() {
+	public List<Peregrino> obtenerTodosPeregrinos() {
 	    String sqlPeregrino = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_carnet, p.id_usuario, " +
 	                 "c.id AS carnet_id, c.parada_inicial, c.fechaexp, c.distancia, c.nvips, " +
 	                 "pa.id AS parada_id, pa.nombre AS parada_nombre, pa.region, pa.responsable " +
@@ -238,7 +246,7 @@ public class PeregrinoDAO {
 		
 	    Carnet carnet = new Carnet();
 	    carnet.setParadaInicial(new Parada(1L, "Parada Inicial", 'N', "Responsable")); 
-	    carnetDAO.insertar(carnet);
+	    carnetDAO.insertarCarnet(carnet);
 	    
 	    Usuario usuario = new Usuario("david", "david", "peregrino");
 	    usuarioDAO.insertar(usuario);
@@ -249,16 +257,15 @@ public class PeregrinoDAO {
 	    Peregrino p = new Peregrino("David", "Español", carnet, 0L); 
 	    
 	
-	    boolean resultado = peregrino.insertar(p);
-	    
-	  
-	    if (resultado) {
-	        System.out.println("El peregrino fue insertado correctamente.");
+	    Optional<Long> resultado = peregrino.insertarPeregrino(p);
+	   
+	    if (resultado.isPresent()) {
+	        System.out.println("El peregrino fue insertado correctamente." + resultado.get());
 	    } else {
 	        System.out.println("Hubo un error al insertar el peregrino.");
 	    }
-		//Peregrino p = peregrino.obtenerPorId(1L);
-//		List<Peregrino> listaPeregrinos = peregrino.obtenerTodos();
+		//Peregrino p = peregrino.obtenerPeregrinoPorId(1L);
+//		List<Peregrino> listaPeregrinos = peregrino.obtenerTodosPeregrinos();
 //		for(Peregrino p : listaPeregrinos) {
 //			System.out.println(p);
 //		}
