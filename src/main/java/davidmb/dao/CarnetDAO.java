@@ -50,6 +50,30 @@ public class CarnetDAO {
 		}
 		return Optional.empty();
 	}
+	
+	public boolean modificarCarnet(Carnet carnet) {
+		String sqlCarnet = "UPDATE Carnets SET distancia = ?, nvips = ? WHERE id = ?";
+		boolean ret = false;
+		
+		try(Connection connection = con.getConexion();
+			PreparedStatement carnetStmt = connection.prepareStatement(sqlCarnet)	
+			) {
+			carnetStmt.setDouble(1, carnet.getDistancia());
+			carnetStmt.setInt(2, carnet.getnVips());
+			carnetStmt.setLong(3, carnet.getId());
+			
+			int rowsAffected = carnetStmt.executeUpdate();
+			if(rowsAffected > 0) {
+                ret = true;
+                logger.info("Carnet modificado: " + carnet);
+			}else {
+                logger.info("No se ha modificado el carnet: " + carnet);
+                }
+			} catch (SQLException e) {
+				logger.severe("Error al modificar carnet: " + e.getMessage());
+			}
+		return ret;
+	}
 
 	public Carnet obtenerCarnetPorId(Long id) {
 		 String sqlCarnet = "SELECT Carnets.id, Carnets.fechaexp, Carnets.distancia, Carnets.nvips, " +
@@ -94,6 +118,14 @@ public class CarnetDAO {
 	public static void main(String args[]) {
 		CarnetDAO dao = new CarnetDAO();
 		
-		System.out.println(dao.obtenerCarnetPorId(1L));
+		Carnet c = dao.obtenerCarnetPorId(1L);
+		System.out.println(c);
+		c.setDistancia(100.0);
+		c.setnVips(5);
+		
+		boolean res = dao.modificarCarnet(c);
+		
+		
+		System.out.println(c);
 	}
 }
