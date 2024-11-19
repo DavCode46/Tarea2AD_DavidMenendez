@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import davidmb.models.Carnet;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
 
@@ -72,39 +73,112 @@ public class ParadaDAO {
 	}
 
 	public List<Peregrino> obtenerPeregrinosParada(Long idParada) {
-		String sqlPeregrinosParadas = "SELECT id_peregrino FROM Peregrinos_paradas WHERE id_parada = ?";
-		String sqlPeregrino = "SELECT * FROM Peregrinos WHERE id = ?";
-		List<Peregrino> peregrinos = new ArrayList<>();
+	
+	    String sql = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_usuario, "
+	               + "c.id AS carnet_id, c.fechaexp, c.distancia, c.nvips, "
+	               + "pa.id AS parada_inicial_id, pa.nombre AS parada_inicial_nombre, pa.region, pa.responsable "
+	               + "FROM Peregrinos p "
+	               + "INNER JOIN Carnets c ON p.id_carnet = c.id "
+	               + "INNER JOIN Paradas pa ON c.parada_inicial = pa.id "
+	               + "INNER JOIN Peregrinos_paradas pp ON pp.id_peregrino = p.id "
+	               + "WHERE pp.id_parada = ?";
+	    
+	   
+	    String sqlEstancias = "SELECT id FROM Estancias WHERE id_peregrino = ?";
 
-		try (Connection connection = con.getConexion();
-				PreparedStatement paradasStmt = connection.prepareStatement(sqlPeregrinosParadas)) {
+	
+	    String sqlParadas = "SELECT id_parada FROM Peregrinos_paradas WHERE id_peregrino = ?";
 
-			paradasStmt.setLong(1, idParada);
-			try (ResultSet rsParadas = paradasStmt.executeQuery()) {
-				while (rsParadas.next()) {
-					Long idPeregrino = rsParadas.getLong("id_peregrino");
+	    String sqlPeregrinosParadaInicial = "SELECT p.id, p.nombre, p.nacionalidad, p.id_usuario "
+	                                      + "FROM Peregrinos p "
+	                                      + "INNER JOIN Peregrinos_paradas pp ON pp.id_peregrino = p.id "
+	                                      + "WHERE pp.id_parada = ?";
 
-					try (PreparedStatement peregrinoStmt = connection.prepareStatement(sqlPeregrino)) {
-						peregrinoStmt.setLong(1, idPeregrino);
-						try (ResultSet rsPeregrino = peregrinoStmt.executeQuery()) {
-							if (rsPeregrino.next()) {
-								Peregrino peregrino = new Peregrino();
-								peregrino.setId(rsPeregrino.getLong("id"));
-								peregrino.setNombre(rsPeregrino.getString("nombre"));
-								peregrino.setNacionalidad(rsPeregrino.getString("nacionalidad"));
+	    List<Peregrino> peregrinos = new ArrayList<>();
 
-								peregrinos.add(peregrino);
-							}
-						}
-					}
-				}
-			}
-		} catch (SQLException e) {
-			logger.severe("Error al obtener peregrinos de la parada: " + e.getMessage());
-		}
+	    try (Connection connection = con.getConexion();
+	         PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-		return peregrinos;
+	        stmt.setLong(1, idParada);
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            while (rs.next()) {
+	               
+	                Peregrino peregrino = new Peregrino();
+	                peregrino.setId(rs.getLong("peregrino_id"));
+	                peregrino.setNombre(rs.getString("nombre"));
+	                peregrino.setNacionalidad(rs.getString("nacionalidad"));
+	                peregrino.setIdUsuario(rs.getLong("id_usuario"));
+
+	              
+	                Carnet carnet = new Carnet();
+	                carnet.setId(rs.getLong("carnet_id"));
+	                carnet.setFechaExp(rs.getDate("fechaexp").toLocalDate());
+	                carnet.setDistancia(rs.getDouble("distancia"));
+	                carnet.setnVips(rs.getInt("nvips"));
+
+	              
+	                Parada paradaInicial = new Parada();
+	                paradaInicial.setId(rs.getLong("parada_inicial_id"));
+	                paradaInicial.setNombre(rs.getString("parada_inicial_nombre"));
+	                paradaInicial.setRegion(rs.getString("region").charAt(0));
+	                paradaInicial.setResponsable(rs.getString("responsable"));
+
+	              
+	                List<Long> peregrinosParadaInicial = new ArrayList<>();
+	                try (PreparedStatement paradaInicialStmt = connection.prepareStatement(sqlPeregrinosParadaInicial)) {
+	                    paradaInicialStmt.setLong(1, paradaInicial.getId());
+	                    try (ResultSet rsPeregrinosParadaInicial = paradaInicialStmt.executeQuery()) {
+	                        while (rsPeregrinosParadaInicial.next()) {
+	                            Long idPeregrinoParadaInicial = rsPeregrinosParadaInicial.getLong("id");
+
+	                            peregrinosParadaInicial.add(idPeregrinoParadaInicial);
+	                        }
+	                    }
+	                }
+	                paradaInicial.setPeregrinos(peregrinosParadaInicial);
+	                carnet.setParadaInicial(paradaInicial);
+
+	                peregrino.setCarnet(carnet);
+
+	              
+	                List<Long> estancias = new ArrayList<>();
+	                try (PreparedStatement estanciasStmt = connection.prepareStatement(sqlEstancias)) {
+	                    estanciasStmt.setLong(1, peregrino.getId());
+	                    try (ResultSet rsEstancias = estanciasStmt.executeQuery()) {
+	                        while (rsEstancias.next()) {
+	                            estancias.add(rsEstancias.getLong("id"));
+	                        }
+	                    }
+	                }
+	                peregrino.setEstancias(estancias);
+
+	               
+	                List<Long> paradasVisitadas = new ArrayList<>();
+	                try (PreparedStatement paradasStmt = connection.prepareStatement(sqlParadas)) {
+	                    paradasStmt.setLong(1, peregrino.getId());
+	                    try (ResultSet rsParadas = paradasStmt.executeQuery()) {
+	                        while (rsParadas.next()) {
+	                            paradasVisitadas.add(rsParadas.getLong("id_parada"));
+	                        }
+	                    }
+	                }
+	                peregrino.setParadas(paradasVisitadas);
+
+	             
+	                peregrinos.add(peregrino);
+	            }
+	        }
+	    } catch (SQLException e) {
+	        logger.severe("Error al obtener peregrinos de la parada: " + e.getMessage());
+	    }
+
+	    return peregrinos;
 	}
+
+
+
+
+
 
 	public List<Parada> obtenerTodasParadas() {
 	    String sql = "SELECT * FROM Paradas";
