@@ -18,7 +18,7 @@ public class Parada implements Serializable{
 	private char region;
 	private String responsable;
 	private Long idUsuario;
-	private List<Peregrino> peregrinos = new ArrayList<Peregrino>();
+	private List<Long> peregrinos = new ArrayList<Long>();
 
 	public Parada() {
 		super();
@@ -64,11 +64,11 @@ public class Parada implements Serializable{
 		this.responsable = responsable;
 	}
 
-	public List<Peregrino> getPeregrinos() {
+	public List<Long> getPeregrinos() {
 		return peregrinos;
 	}
 
-	public void setPeregrinos(List<Peregrino> peregrinos) {
+	public void setPeregrinos(List<Long> peregrinos) {
 		this.peregrinos = peregrinos;
 	}
 	
