@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import davidmb.models.Estancia;
@@ -41,13 +40,35 @@ public class EstanciaDAO {
 		return result;
 	}
 
-	public void modificar(Estancia estancia) {
-		System.out.println("Modificando estancia");
-	}
+	
 
-	public Estancia obtenerPorId(int id) {
-		System.out.println("Obteniendo estancia por id");
-		return new Estancia();
+	public List<Estancia> obtenerEstanciaPorIdPeregrino(Long id) {
+		String sql = "SELECT * FROM Estancias WHERE id_peregrino = ?";
+		List<Estancia> estancias = new ArrayList<>();
+		
+		try(Connection connection = con.getConexion();
+			PreparedStatement stmt = connection.prepareStatement(sql);	
+			) {
+			stmt.setLong(1, id);
+			
+			try(ResultSet rs = stmt.executeQuery();) {
+				while(rs.next()) {
+					Estancia estancia = new Estancia();
+					estancia = new Estancia();
+					estancia.setId(rs.getLong("id"));
+					estancia.setPeregrino(rs.getLong("id_peregrino"));
+					estancia.setParada(rs.getLong("id_parada"));
+					estancia.setFecha(rs.getDate("fecha").toLocalDate());
+					estancia.setVip(rs.getBoolean("vip"));
+					estancias.add(estancia);
+				}
+			}
+			
+		}catch(SQLException ex) {
+			logger.severe("Error al obtener la estancia del peregrino");
+		}
+		
+		return estancias;
 	}
 
 	public List<Estancia> obtenerTodos() {
@@ -61,5 +82,9 @@ public class EstanciaDAO {
 //		
 //		boolean ret = dao.insertar(estancia);
 //		System.out.println(ret);
+		List<Estancia> estanciasPeregrino = dao.obtenerEstanciaPorIdPeregrino(1L);
+		for(Estancia e : estanciasPeregrino) {
+			System.out.println(e);
+		}
 	}
 }
