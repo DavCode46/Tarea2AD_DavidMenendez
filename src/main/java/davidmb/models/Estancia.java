@@ -12,16 +12,15 @@ public class Estancia {
 	private Long id;
 	private LocalDate fecha;
 	private boolean vip = false;
-	private Peregrino peregrino;
-	private Parada parada;
+	private Long peregrino;
+	private Long parada;
 
 	public Estancia() {
 		super();
 	}
 
-	public Estancia(Long id, LocalDate fecha, boolean vip, Peregrino peregrino, Parada parada) {
+	public Estancia(LocalDate fecha, boolean vip, Long peregrino, Long parada) {
 		super();
-		this.id = id;
 		this.fecha = fecha;
 		this.vip = vip;
 		this.peregrino = peregrino;
@@ -52,19 +51,19 @@ public class Estancia {
 		this.vip = vip;
 	}
 
-	public Peregrino getPeregrino() {
+	public Long getPeregrino() {
 		return peregrino;
 	}
 
-	public void setPeregrino(Peregrino peregrino) {
+	public void setPeregrino(Long peregrino) {
 		this.peregrino = peregrino;
 	}
 
-	public Parada getParada() {
+	public Long getParada() {
 		return parada;
 	}
 
-	public void setParada(Parada parada) {
+	public void setParada(Long parada) {
 		this.parada = parada;
 	}
 
