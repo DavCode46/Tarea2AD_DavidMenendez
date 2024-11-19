@@ -13,7 +13,7 @@ public class UsuarioDAO {
 	private static final Logger logger = Logger.getLogger(UsuarioDAO.class.getName());
 	ConexionDB con = ConexionDB.getInstancia();
 
-	public Long insertar(Usuario u) {
+	public Long insertarUsuario(Usuario u) {
 		String sqlUsuario = "INSERT INTO Usuarios (usuario, password, perfil) VALUES (?, ?, ?)";
 		Long idUsuario = null;
 
@@ -67,17 +67,17 @@ public class UsuarioDAO {
 		return u;
 	}
 
-	public static void main(String args[]) {
-		UsuarioDAO uDAO = new UsuarioDAO();
+//	public static void main(String args[]) {
+//		UsuarioDAO uDAO = new UsuarioDAO();
 //		Usuario u = new Usuario("David", "david", "peregrino");
 //		
 //		uDAO.insertar(u);
-		Usuario u = uDAO.login("responsable1", "respass1");
-		if (u != null) {
-			System.out.println("Usuario encontrado: " + u);
-		} else {
-			System.out.println("Usuario no encontrado");
-		}
-	}
+//		Usuario u = uDAO.login("responsable1", "respass1");
+//		if (u != null) {
+//			System.out.println("Usuario encontrado: " + u);
+//		} else {
+//			System.out.println("Usuario no encontrado");
+//		}
+//	}
 
 }

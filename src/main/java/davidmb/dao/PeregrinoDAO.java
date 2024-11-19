@@ -315,12 +315,12 @@ public class PeregrinoDAO {
 		return peregrinos;
 	}
 
-	public static void main(String[] args) {
-		PeregrinoDAO peregrino = new PeregrinoDAO();
-		
-		Peregrino p = peregrino.obtenerPeregrinoPorIdUsuario(7L);
-		
-		System.out.println(p);
+//	public static void main(String[] args) {
+//		PeregrinoDAO peregrino = new PeregrinoDAO();
+//		
+//		Peregrino p = peregrino.obtenerPeregrinoPorIdUsuario(7L);
+//		
+//		System.out.println(p);
 //		UsuarioDAO usuarioDAO = new UsuarioDAO();
 //		CarnetDAO carnetDAO = new CarnetDAO();
 //
@@ -340,13 +340,13 @@ public class PeregrinoDAO {
 //		} else {
 //			System.out.println("Hubo un error al insertar el peregrino.");
 //		}
-		// Peregrino p = peregrino.obtenerPeregrinoPorId(1L);
+//		 Peregrino p = peregrino.obtenerPeregrinoPorId(1L);
 //		List<Peregrino> listaPeregrinos = peregrino.obtenerTodosPeregrinos();
 //		for(Peregrino p : listaPeregrinos) {
 //			System.out.println(p);
 //		}
-		// System.out.println(p);
-
-	}
+//		 System.out.println(p);
+//
+//	}
 
 }

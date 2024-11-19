@@ -115,17 +115,17 @@ public class CarnetDAO {
 		return carnet;
 	}
 	
-	public static void main(String args[]) {
-		CarnetDAO dao = new CarnetDAO();
-		
-		Carnet c = dao.obtenerCarnetPorId(1L);
-		System.out.println(c);
-		c.setDistancia(100.0);
-		c.setnVips(5);
-		
-		boolean res = dao.modificarCarnet(c);
-		
-		
-		System.out.println(c);
-	}
+//	public static void main(String args[]) {
+//		CarnetDAO dao = new CarnetDAO();
+//		
+//		Carnet c = dao.obtenerCarnetPorId(1L);
+//		System.out.println(c);
+//		c.setDistancia(100.0);
+//		c.setnVips(5);
+//		
+//		boolean res = dao.modificarCarnet(c);
+//		
+//		
+//		System.out.println(c);
+//	}
 }

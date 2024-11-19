@@ -71,20 +71,44 @@ public class EstanciaDAO {
 		return estancias;
 	}
 
-	public List<Estancia> obtenerTodos() {
-		System.out.println("Obteniendo todas las estancias");
-		return new ArrayList<Estancia>();
+	public List<Estancia> obtenerEstanciasPorIdParada(Long id) {
+		String sql = "SELECT * FROM Estancias WHERE id_parada = ?";
+		List<Estancia> estancias = new ArrayList<>();
+		
+		try(Connection connection = con.getConexion();
+			PreparedStatement stmt = connection.prepareStatement(sql);	
+			) {
+			stmt.setLong(1, id);
+			
+			try(ResultSet rs = stmt.executeQuery();) {
+				while(rs.next()) {
+					Estancia estancia = new Estancia();
+					estancia = new Estancia();
+					estancia.setId(rs.getLong("id"));
+					estancia.setPeregrino(rs.getLong("id_peregrino"));
+					estancia.setParada(rs.getLong("id_parada"));
+					estancia.setFecha(rs.getDate("fecha").toLocalDate());
+					estancia.setVip(rs.getBoolean("vip"));
+					estancias.add(estancia);
+				}
+			}
+			
+		}catch(SQLException ex) {
+			logger.severe("Error al obtener la estancia del peregrino");
+		}
+		
+		return estancias;
 	}
-	
-	public static void main(String args[]) {
-		EstanciaDAO dao = new EstanciaDAO();
+//	
+//	public static void main(String args[]) {
+//		EstanciaDAO dao = new EstanciaDAO();
 //		Estancia estancia = new Estancia(java.time.LocalDate.now(), false, 1L, 2L);
 //		
-//		boolean ret = dao.insertar(estancia);
+//		boolean ret = dao.insertarEstancia(estancia);
 //		System.out.println(ret);
-		List<Estancia> estanciasPeregrino = dao.obtenerEstanciaPorIdPeregrino(1L);
-		for(Estancia e : estanciasPeregrino) {
-			System.out.println(e);
-		}
-	}
+//		List<Estancia> estanciasPeregrino = dao.obtenerEstanciaPorIdPeregrino(1L);
+//		for(Estancia e : estanciasPeregrino) {
+//			System.out.println(e);
+//		}
+//	}
 }

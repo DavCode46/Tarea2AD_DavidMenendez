@@ -18,7 +18,7 @@ public class ParadaDAO {
 	ConexionDB con = ConexionDB.getInstancia();
 	Logger logger = Logger.getLogger(ParadaDAO.class.getName());
 
-	public Optional<Long> insertar(Parada parada) {
+	public Optional<Long> insertarParada(Parada parada) {
 		String sqlParadas = "INSERT INTO Paradas (nombre, region, responsable, id_usuario) VALUES (?, ?, ?, ?)";
 		String sqlUsuarios = "SELECT MAX(id) FROM Usuarios";
 
@@ -221,17 +221,17 @@ public class ParadaDAO {
 	}
 
 
-	public static void main(String args[]) {
-		ParadaDAO dao = new ParadaDAO();
-
-		List<Peregrino> peregrinos = dao.obtenerPeregrinosParada(1L);
-		for (Peregrino p : peregrinos) {
-			System.out.println(p);
-		}
+//	public static void main(String args[]) {
+//		ParadaDAO dao = new ParadaDAO();
+//
+//		List<Peregrino> peregrinos = dao.obtenerPeregrinosParada(1L);
+//		for (Peregrino p : peregrinos) {
+//			System.out.println(p);
+//		}
 //		List<Parada> paradas = dao.obtenerTodasParadas();
 //		for (Parada p : paradas) {
 //			System.out.println(p);
 //		}
-	}
+//	}
 
 }
