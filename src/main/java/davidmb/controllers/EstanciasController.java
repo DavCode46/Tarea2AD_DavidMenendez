@@ -22,8 +22,8 @@ public class EstanciasController {
 		return estanciasService.insertarEstancia(estancia);
 	}
 	
-	public List<Estancia> obtenerEstanciaPorIdPeregrino(Long idPeregrino) {
-		return estanciasService.obtenerEstanciaPorIdPeregrino(idPeregrino);
+	public List<Estancia> obtenerEstanciasPorIdPeregrino(Long idPeregrino) {
+		return estanciasService.obtenerEstanciasPorIdPeregrino(idPeregrino);
 	}
 	
 	// Si no se encuentra devolver collection.emptyList(); No null --> A implementar

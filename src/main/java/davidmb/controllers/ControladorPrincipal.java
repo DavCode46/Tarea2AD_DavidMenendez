@@ -27,6 +27,7 @@ import org.xml.sax.SAXException;
 
 import davidmb.main.Sesion;
 import davidmb.models.Carnet;
+import davidmb.models.Estancia;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
 import davidmb.models.Perfil;
@@ -109,6 +110,16 @@ public class ControladorPrincipal {
 	public Optional<Peregrino> obtenerPeregrinoPorIdUsuario(Long id) {
 		PeregrinosController pec = new PeregrinosController();
 		return pec.obtenerPeregrinoPorIdUsuario(id);
+	}
+	
+	public List<Parada> obtenerParadasPorIdPeregrino(Long idPeregrino) {
+		ParadasController pc = new ParadasController();
+		return pc.obtenerParadasPorIdPeregrino(idPeregrino);
+	}
+	
+	public List<Estancia> obtenerEstanciasPorIdPeregrino(Long idPeregrino) {
+		EstanciasController ec = new EstanciasController();
+		return ec.obtenerEstanciasPorIdPeregrino(idPeregrino);
 	}
 
 

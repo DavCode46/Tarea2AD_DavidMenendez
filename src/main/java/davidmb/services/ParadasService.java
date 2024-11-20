@@ -27,6 +27,10 @@ public class ParadasService {
 		return paradaDAO.insertarPeregrinosParadas(idPeregrino, idParada);
 	}
 	
+	public List<Parada> obtenerParadasPorIdPeregrino(Long idPeregrino) {
+		return paradaDAO.obtenerParadasPorIdPeregrino(idPeregrino);
+	}
+	
 	public Optional<Parada> obtenerParadaPorIdUsuario(Long idUsuario) {
 		return paradaDAO.obtenerParadaPorIdUsuario(idUsuario);
 	}

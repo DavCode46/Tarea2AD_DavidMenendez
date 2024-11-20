@@ -2,6 +2,7 @@ package davidmb.controllers;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
@@ -36,7 +37,16 @@ public class ExportarCarnetXML {
      * @throws Exception Si ocurre un error durante la creación del archivo XML.
      */
     public void exportarCarnet(Peregrino peregrino) throws Exception {
-       System.out.println(peregrino);
+    	ControladorPrincipal sistema = new ControladorPrincipal();
+    	List<Estancia> listaEstancias = sistema.obtenerEstanciasPorIdPeregrino(peregrino.getId());
+		for (Estancia e : listaEstancias) {
+			System.out.println(e);
+		}
+    	List<Parada> listaParadas = sistema.obtenerParadasPorIdPeregrino(peregrino.getId());
+    	        for (Parada p : listaParadas) {
+    	        	        	            System.out.println(p);
+    	        }
+       
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.newDocument();
@@ -89,49 +99,49 @@ public class ExportarCarnetXML {
 
         
         Element paradasElem = doc.createElement("paradas");
-//        for(int i = 0; i < peregrino.getParadas().size(); i++) {
-//        //	Parada parada = peregrino.getParadas().get(i);
-//        	Element paradaElem = doc.createElement("parada");
-//        	Element orden = doc.createElement("orden");
-//        	orden.setTextContent(String.valueOf(i + 1));
-//        	paradaElem.appendChild(orden);
-//        	Element nombreParada = doc.createElement("nombre");
-//        	nombreParada.setTextContent(parada.getNombre());
-//        	paradaElem.appendChild(nombreParada);
-//        	Element region = doc.createElement("region");
-//        	region.setTextContent(String.valueOf(parada.getRegion()));
-//        	paradaElem.appendChild(region);
-//        	paradasElem.appendChild(paradaElem);
-//        }
-//        carnetElem.appendChild(paradasElem);
+        for(int i = 0; i < listaParadas.size(); i++) {
+        //	Parada parada = peregrino.getParadas().get(i);
+        	Element paradaElem = doc.createElement("parada");
+        	Element orden = doc.createElement("orden");
+        	orden.setTextContent(String.valueOf(i + 1));
+        	paradaElem.appendChild(orden);
+        	Element nombreParada = doc.createElement("nombre");
+        	nombreParada.setTextContent(listaParadas.get(i).getNombre());
+        	paradaElem.appendChild(nombreParada);
+        	Element region = doc.createElement("region");
+        	region.setTextContent(String.valueOf(listaParadas.get(i).getRegion()));
+        	paradaElem.appendChild(region);
+        	paradasElem.appendChild(paradaElem);
+        }
+        carnetElem.appendChild(paradasElem);
 
        
         Element estanciasElem = doc.createElement("estancias");
-//        for (Estancia estancia : peregrino.getEstancias()) {
-//            Element estanciaElem = doc.createElement("estancia");
-//
-//            Element idEstanciaElem = doc.createElement("id");
-//            idEstanciaElem.setTextContent(String.valueOf(estancia.getId()));
-//            estanciaElem.appendChild(idEstanciaElem);
-//
-//            Element fechaElem = doc.createElement("fecha");
-//            fechaElem.setTextContent(estancia.getFecha().toString());
-//            estanciaElem.appendChild(fechaElem);
-//
-//            Element paradaEstanciaElem = doc.createElement("parada");
-//            paradaEstanciaElem.setTextContent(estancia.getParada().getNombre());
-//            estanciaElem.appendChild(paradaEstanciaElem);
-//
-//           
-//            if (estancia.isVip()) {
-//                Element vip = doc.createElement("vip");
-//                vip.setTextContent("Sí");
-//                estanciaElem.appendChild(vip);
-//            }
-//
-//            estanciasElem.appendChild(estanciaElem);
-//        }
-//        carnetElem.appendChild(estanciasElem);
+        for (Estancia estancia : listaEstancias) {
+            Element estanciaElem = doc.createElement("estancia");
+
+            Element idEstanciaElem = doc.createElement("id");
+            idEstanciaElem.setTextContent(String.valueOf(estancia.getId()));
+            estanciaElem.appendChild(idEstanciaElem);
+
+            Element fechaElem = doc.createElement("fecha");
+            fechaElem.setTextContent(estancia.getFecha().toString());
+            estanciaElem.appendChild(fechaElem);
+
+            Element paradaEstanciaElem = doc.createElement("parada");
+            paradaEstanciaElem.setTextContent(estancia.getParada().getNombre());
+            estanciaElem.appendChild(paradaEstanciaElem);
+
+           
+            if (estancia.isVip()) {
+                Element vip = doc.createElement("vip");
+                vip.setTextContent("Sí");
+                estanciaElem.appendChild(vip);
+            }
+
+            estanciasElem.appendChild(estanciaElem);
+        }
+        carnetElem.appendChild(estanciasElem);
 
        
         TransformerFactory transformerFactory = TransformerFactory.newInstance();

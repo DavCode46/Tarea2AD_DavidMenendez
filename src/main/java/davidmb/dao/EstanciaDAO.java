@@ -42,7 +42,7 @@ public class EstanciaDAO {
 
 	
 
-	public List<Estancia> obtenerEstanciaPorIdPeregrino(Long id) {
+	public List<Estancia> obtenerEstanciasPorIdPeregrino(Long id) {
 		String sql = "SELECT * FROM Estancias WHERE id_peregrino = ?";
 		List<Estancia> estancias = new ArrayList<>();
 		

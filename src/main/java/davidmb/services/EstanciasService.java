@@ -21,8 +21,8 @@ public class EstanciasService {
 		return estanciaDAO.insertarEstancia(estancia);
 	}
 	
-	public List<Estancia> obtenerEstanciaPorIdPeregrino(Long idPeregrino) {
-		return estanciaDAO.obtenerEstanciaPorIdPeregrino(idPeregrino);
+	public List<Estancia> obtenerEstanciasPorIdPeregrino(Long idPeregrino) {
+		return estanciaDAO.obtenerEstanciasPorIdPeregrino(idPeregrino);
 	}
 	
 	public List<Estancia> obtenerEstanciasPorIdParada(Long idParada) {

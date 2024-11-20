@@ -72,6 +72,33 @@ public class ParadaDAO {
 		return Optional.ofNullable(parada);
 	}
 	
+	public List<Parada> obtenerParadasPorIdPeregrino(Long idPeregrino) {
+		String sql = "SELECT * \r\n"
+				+ "FROM Peregrinos_paradas \r\n"
+				+ "INNER JOIN Paradas ON Peregrinos_paradas.id_parada = Paradas.id\r\n"
+				+ "WHERE Peregrinos_paradas.id_peregrino = ?\r\n"
+				+ "ORDER BY Fecha ASC"; 
+		List<Parada> paradas = new ArrayList<>();
+		
+		try (Connection connection = con.getConexion(); 
+			PreparedStatement stmt = connection.prepareStatement(sql)) {
+			stmt.setLong(1, idPeregrino);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					Parada parada = new Parada();
+					parada.setId(rs.getLong("id"));
+					parada.setNombre(rs.getString("nombre"));
+					parada.setRegion(rs.getString("region").charAt(0));
+					parada.setResponsable(rs.getString("responsable"));
+					paradas.add(parada);
+				}
+			}
+		} catch (SQLException e) {
+			logger.severe("Error al obtener paradas por id de peregrino: " + e.getMessage());
+		}
+		return paradas;
+	}
+	
 	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada) {
 		String sql = "INSERT INTO Peregrinos_paradas (id_peregrino, id_parada) VALUES (?, ?)";
 		try (Connection connection = con.getConexion(); 
