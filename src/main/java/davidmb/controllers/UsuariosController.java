@@ -29,4 +29,8 @@ public class UsuariosController {
 	public boolean usuarioExiste(String usuario) {
 		return usuariosService.usuarioExiste(usuario);
 	}
+	
+	public boolean validarCredenciales(String nombre, String password) {
+		return usuariosService.validarCredenciales(nombre, password);
+	}
 }

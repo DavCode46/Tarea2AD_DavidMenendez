@@ -68,6 +68,28 @@ public class UsuarioDAO {
 		return Optional.ofNullable(u);
 	}
 	
+	public boolean validarCredenciales(String nombre, String password) {
+		String sql = "SELECT * FROM Usuarios WHERE usuario = ? AND password = ?";
+
+		boolean ret = false;
+		try (Connection connection = con.getConexion();
+			PreparedStatement stmt = connection.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery();
+			) {
+
+			stmt.setString(1, nombre);
+			stmt.setString(2, password);
+
+			if (rs.next()) {
+				ret = true;
+			}
+
+		} catch (SQLException ex) {
+			logger.severe("Error al buscar usuario: " + ex.getMessage());
+		}
+		return ret;
+	}
+	
 	public boolean usuarioExiste(String usuario) {
 		boolean existe = false;
 		String sql = "SELECT * FROM Usuarios WHERE usuario = ?";

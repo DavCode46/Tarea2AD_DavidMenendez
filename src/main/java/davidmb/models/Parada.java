@@ -24,9 +24,8 @@ public class Parada implements Serializable{
 		super();
 	}
 
-	public Parada(Long id, String nombre, char region, String responsable) {
+	public Parada(String nombre, char region, String responsable) {
 		super();
-		this.id = id;
 		this.nombre = nombre;
 		this.region = region;
 		this.responsable = responsable;

@@ -28,11 +28,20 @@ public class ParadasController {
 		return paradasService.obtenerParadaPorIdUsuario(idUsuario);
 	}
 	
+	public Optional<Parada> obtenerParadaPorNombre(String nombre) {
+		return paradasService.obtenerParadaPorNombre(nombre);
+	}
+	
+	
 	public List<Peregrino> obtenerPeregrinosParada(Long idParada) {
 		return paradasService.obtenerPeregrinosParada(idParada);
 	}
 	
 	public List<Parada> obtenerTodasParadas() {
 		return paradasService.obtenerTodasParadas();
+	}
+	
+	public boolean paradaExiste(String nombre) {
+		return paradasService.paradaExiste(nombre);
 	}
 }

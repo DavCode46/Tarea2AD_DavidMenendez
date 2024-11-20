@@ -1,17 +1,12 @@
 package davidmb.controllers;
 
 import java.awt.BorderLayout;
-import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -35,6 +30,7 @@ import davidmb.models.Carnet;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
 import davidmb.models.Perfil;
+import davidmb.models.Usuario;
 
 /**
  * La clase Sistema se encarga de gestionar el sistema de registro y autenticación de credenciales,
@@ -78,14 +74,6 @@ public class ControladorPrincipal {
 		return (s != null) ? s.getPerfil() : null;
 	}
 
-	/**
-     * Obtiene una parada según su nombre.
-     * @param nombreParada Nombre de la parada.
-     * @return Objeto Parada asociado al nombre, o null si no existe.
-     */
-	public Parada obtenerParada(String nombreParada) {
-		return paradas.get(nombreParada);
-	}
 
 	/**
      * Obtiene el ID asociado a un nombre de usuario.
@@ -102,6 +90,21 @@ public class ControladorPrincipal {
 		UsuariosController uc = new UsuariosController();
 		return uc.usuarioExiste(usuario);
 	}
+	
+	public boolean validarCredenciales(String nombre, String contrasenia) {
+		UsuariosController uc = new UsuariosController();
+		return uc.validarCredenciales(nombre, contrasenia);
+	}
+	
+	public Optional<Usuario> login(String nombre, String contrasenia) {
+		UsuariosController uc = new UsuariosController();
+		return uc.login(nombre, contrasenia);
+	}
+	
+	public Optional<Long> insertarUsuario(Usuario u) {
+		UsuariosController uc = new UsuariosController();
+		return uc.insertarUsuario(u);
+	}
 
 
 	/**
@@ -110,7 +113,9 @@ public class ControladorPrincipal {
 	 * @param archivoCredenciales
 	 * @return
 	 */
-	private Peregrino registrarPeregrino() {
+	public Peregrino registrarPeregrino() {
+		ParadasController pc = new ParadasController();
+		PeregrinosController pec = new PeregrinosController();
 		Peregrino nuevoPeregrino = null;
 		JOptionPane.showMessageDialog(null, "Formulario de registro de nuevo peregrino");
 
@@ -134,24 +139,31 @@ public class ControladorPrincipal {
 		String parada = "";
 		do {
 			parada = obtenerEntrada(mostrarParadas(true), "Parada", false);
-			if(!paradaExiste(parada)){
+			if(!pc.paradaExiste(parada)){
 				JOptionPane.showMessageDialog(null, "La parada seleccionada no es válida.");
 			}
-		} while(!paradaExiste(parada));
+		} while(!pc.paradaExiste(parada));
 
 		
 		// Confirmar los datos
-		nuevoPeregrino = confirmarDatos(nombre, contrasenia, nacionalidad, parada, archivoCredenciales);
+		nuevoPeregrino = confirmarDatos(nombre, contrasenia, nacionalidad, parada);
 
 		if (nuevoPeregrino == null) {
 			// Si la confirmación falla, pedir nuevos datos
 
-			nuevoPeregrino = obtenerDatosModificados(archivoCredenciales, archivoParadas, nombre, contrasenia, nacionalidad, parada);
+			nuevoPeregrino = obtenerDatosModificados(nombre, contrasenia, nacionalidad, parada);
 
 		}
-		Parada paradaEncontrada = obtenerParada(parada);
-		paradaEncontrada.getPeregrinos().add(nuevoPeregrino);
-
+		Optional<Parada> paradaEncontradaOptional = pc.obtenerParadaPorNombre(nombre);
+		Parada paradaEncontrada = paradaEncontradaOptional.orElse(null);
+		
+		paradaEncontrada.getPeregrinos().add(nuevoPeregrino.getId());
+		Optional<Long> idPeregrinoOptional = pec.insertarPeregrino(nuevoPeregrino);
+		if(idPeregrinoOptional.isPresent()) {
+			JOptionPane.showMessageDialog(null, "Peregrino insertado correctamente");
+		} else {
+			JOptionPane.showMessageDialog(null, "Error al insertar correctamente");
+		}
 		return nuevoPeregrino;
 	}
 
@@ -165,8 +177,9 @@ public class ControladorPrincipal {
 	 * @param archivoCredenciales
 	 * @return Peregrino con los datos introducidos por el usuario
 	 */
-	private Peregrino confirmarDatos(String nombre, String contrasenia, String nacionalidad, String parada,
-			String archivoCredenciales) {
+	private Peregrino confirmarDatos(String nombre, String contrasenia, String nacionalidad, String parada) {
+		UsuariosController uc = new UsuariosController();
+		ParadasController pc = new ParadasController();
 		String mensajeFormateado = String.format("Verifica que los datos son correctos \n" + "Nombre: %s \n" + "Contraseña: %s\n"
 				+ "Nacionalidad: %s\n" + "Parada actual: %s\n", nombre, contrasenia, nacionalidad, parada);
 
@@ -179,12 +192,14 @@ public class ControladorPrincipal {
 				return null;
 			} else {
 				
-				Parada paradaObj = obtenerParada(parada);
-				Peregrino nuevoPeregrino = new Peregrino(id, nombre, nacionalidad, new Carnet(id, paradaObj));
-				nuevoPeregrino.getParadas().add(paradaObj);
-				paradaObj.getPeregrinos().add(nuevoPeregrino);
-				registrarCredenciales(archivoCredenciales, nombre, contrasenia,
-						Perfil.peregrino.toString().toLowerCase(), true);
+				Optional<Parada> paradaObjOptional = pc.obtenerParadaPorNombre(parada);
+				Parada paradaObj = paradaObjOptional.orElse(null);
+				Usuario u = new Usuario(nombre, contrasenia, "peregrino");
+				Optional<Long> idUsuario = uc.insertarUsuario(u);
+				Long idUsuarioValue = idUsuario.orElse(null);
+				Peregrino nuevoPeregrino = new Peregrino(nombre, nacionalidad, new Carnet(paradaObj), idUsuarioValue);
+				nuevoPeregrino.getParadas().add(paradaObj.getId());
+				paradaObj.getPeregrinos().add(nuevoPeregrino.getId());
 				return nuevoPeregrino;
 			}
 		}
@@ -202,8 +217,9 @@ public class ControladorPrincipal {
 	 * @param parada
 	 * @return Peregrino con los datos modificados
 	 */
-	private Peregrino obtenerDatosModificados(String archivoCredenciales, String archivoParadas, String nombre, String contrasenia,
-			String nacionalidad, String parada) {
+	private Peregrino obtenerDatosModificados(String nombre, String contrasenia, String nacionalidad, String parada) {
+		UsuariosController uc = new UsuariosController();
+		ParadasController pc = new ParadasController();
 		// Pide los nuevos datos al usuario
 		String nuevoNombre = obtenerEntrada("Ingrese su nuevo nombre", nombre, false);
 		if (nuevoNombre == null)
@@ -226,30 +242,18 @@ public class ControladorPrincipal {
 			return null;
 		} else {
 			
-			Parada paradaObj = obtenerParada(parada);
-			Peregrino nuevoPeregrino = new Peregrino(id, nombre, nacionalidad, new Carnet(id, paradaObj));
-			nuevoPeregrino.getParadas().add(paradaObj);
-			paradaObj.getPeregrinos().add(nuevoPeregrino);
-			registrarCredenciales(archivoCredenciales, nombre, contrasenia,
-					Perfil.peregrino.toString().toLowerCase(), true);
+			Optional<Parada> paradaObjOptional = pc.obtenerParadaPorNombre(parada);
+			Parada paradaObj = paradaObjOptional.orElse(null);
+			Usuario u = new Usuario(nombre, contrasenia, "peregrino");
+			Optional<Long> idUsuario = uc.insertarUsuario(u);
+			Long idUsuarioValue = idUsuario.orElse(null);
+			Peregrino nuevoPeregrino = new Peregrino(nombre, nacionalidad, new Carnet(paradaObj), idUsuarioValue);
+			nuevoPeregrino.getParadas().add(paradaObj.getId());
+			paradaObj.getPeregrinos().add(nuevoPeregrino.getId());
 			return nuevoPeregrino;
 		}
 	}
 
-
-
-	/**
-	 * Sobreescribe el archivo paradas con las nuevas paradas introducidas 
-	 * por el administrador del sistema, las cuales se pasan mediante un Map
-	 * @param archivoParadas
-	 */
-	private void guardarParadas(String archivoParadas) {
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(archivoParadas))) {
-			oos.writeObject(paradas);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
 
 	 /**
      * Muestra las paradas registradas en el sistema.
@@ -288,18 +292,26 @@ public class ControladorPrincipal {
      * @param responsable Responsable de la parada.
      * @return true si el registro fue exitoso; false en caso contrario.
      */
-	public boolean registrarParada(String archivoParadas, String nombre, char region, String responsable) {
-		if (paradas.containsKey(nombre)) {
+	public boolean registrarParada(String nombre, char region, String responsable) {
+		ParadasController pc = new ParadasController();
+		if (pc.paradaExiste(nombre)) {
 			JOptionPane.showMessageDialog(null, "La parada ya existe");
 			return false;
 		}
-		Long id = (long) paradas.size() + 1;
-		Parada nuevaParada = new Parada(id, nombre, region, responsable);
-		paradas.put(nombre, nuevaParada);
-		guardarParadas(archivoParadas);
+		
+		Parada nuevaParada = new Parada(nombre, region, responsable);
+		Optional<Long> idParadaInsertada = pc.insertarParada(nuevaParada);
+		if(idParadaInsertada.isPresent()) {
+			JOptionPane.showMessageDialog(null, "Parada registrada con éxito");
+			return true;
+		}
 
-		JOptionPane.showMessageDialog(null, "Parada registrada con éxito");
-		return true;
+		return false;
+	}
+	
+	public boolean paradaExiste(String nombre) {
+		ParadasController pc = new ParadasController();
+		return pc.paradaExiste(nombre);
 	}
 
 	/**
@@ -307,9 +319,10 @@ public class ControladorPrincipal {
      * @param nombre Nombre de la parada.
      * @return true si la parada existe; false en caso contrario.
      */
-	public boolean paradaExiste(String nombre) {
-		return paradas.containsKey(nombre);
-	}
+//	public boolean paradaExiste(String nombre) {
+//		ParadasController pc = new ParadasController();
+//		return pc.paradaExiste(nombre);
+//	}
 
 	 /**
      * Muestra la lista de países disponibles cargada desde el archivo XML.

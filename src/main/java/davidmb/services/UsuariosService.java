@@ -28,4 +28,8 @@ public class UsuariosService {
 	public boolean usuarioExiste(String usuario) {
 		return usuarioDAO.usuarioExiste(usuario);
 	}
+	
+	public boolean validarCredenciales(String nombre, String password) {
+		return usuarioDAO.validarCredenciales(nombre, password);
+	}
 }

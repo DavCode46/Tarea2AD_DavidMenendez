@@ -71,6 +71,30 @@ public class ParadaDAO {
 		}
 		return Optional.ofNullable(parada);
 	}
+	
+	public Optional<Parada> obtenerParadaPorNombre(String nombre) {
+		String paradaSql = "SELECT * FROM Paradas WHERE nombre = ?";
+
+		Parada parada = null;
+
+		try (Connection connection = con.getConexion();
+				PreparedStatement paradaStmt = connection.prepareStatement(paradaSql);) {
+			paradaStmt.setString(1, nombre);
+			try (ResultSet rs = paradaStmt.executeQuery()) {
+				if (rs.next()) {
+					parada = new Parada();
+					parada.setId(rs.getLong("id"));
+					parada.setNombre(rs.getString("nombre"));
+					parada.setRegion(rs.getString("region").charAt(0));
+					parada.setResponsable(rs.getString("responsable"));
+				}
+			}
+
+		} catch (SQLException e) {
+			logger.severe("Error al obtener parada por id de usuario: " + e.getMessage());
+		}
+		return Optional.ofNullable(parada);
+	}
 
 	public List<Peregrino> obtenerPeregrinosParada(Long idParada) {
 	
