@@ -2,6 +2,7 @@ package davidmb.main;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Properties;
 
 import javax.swing.JOptionPane;
@@ -90,10 +91,16 @@ public class Principal {
 
 					} else if (sistema.validarCredenciales(nombreUsuario, contrasenia)) {
 
-						userActivo.setPerfil(sistema.obtenerPerfil(nombreUsuario));
-						userActivo.setId(sistema.getId(nombreUsuario));
-						userActivo.setNombreUsuario(nombreUsuario);
-
+						Optional<Usuario> usuarioOptional = sistema.login(nombreUsuario, contrasenia);
+						if (usuarioOptional.isPresent()) {
+							Optional<Peregrino> peregrinoOptional = sistema.obtenerPeregrinoPorIdUsuario(usuarioOptional.get().getId());
+							if (peregrinoOptional.isPresent()) {
+								p = peregrinoOptional.get();
+							}
+							Usuario u = usuarioOptional.get();
+							userActivo = new Sesion(u.getNombreUsuario(), Perfil.valueOf(u.getPerfil()), u.getId());
+						}
+						
 						JOptionPane.showMessageDialog(null, "Bienvenido " + nombreUsuario + "!\nPerfil: "
 								+ userActivo.getPerfil() + "\nID: " + userActivo.getId());
 					} else {
@@ -126,15 +133,16 @@ public class Principal {
 			}
 			case "2": {
 				// Registrar peregrino
-			//	p = sistema.registrarPeregrino();
+				p = sistema.registrarPeregrino();
+				System.out.println(p);
 
 				if (p != null) {
 					userActivo = new Sesion(p.getNombre(), Perfil.peregrino, p.getId());
 					String mensajeBienvenida = String.format("Sus datos:\n" + "ID: %s\n" + "Nombre: %s\n"
 							+ "Nacionalidad: %s\n" + "Fecha de expedición del carnet: %s\n" + "Parada inicial: %s\n"
-							+ "Región de la parada: %s\n" + "Distancia recorrida: %.2f km\n" + "Número de VIPS: %d\n",
+							+ "Distancia recorrida: %.2f km\n" + "Número de VIPS: %d\n",
 							p.getId(), p.getNombre(), p.getNacionalidad(), p.getCarnet().getFechaExp(),
-						//	p.getParadas().get(0).getId(), p.getParadas().get(0).getRegion(),
+						    p.getCarnet().getParadaInicial().getNombre(),
 							p.getCarnet().getDistancia(), p.getCarnet().getnVips());
 					JOptionPane.showMessageDialog(null, mensajeBienvenida);
 					ExportarCarnetXML exportar = new ExportarCarnetXML();

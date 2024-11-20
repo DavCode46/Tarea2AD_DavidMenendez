@@ -72,9 +72,26 @@ public class ParadaDAO {
 		return Optional.ofNullable(parada);
 	}
 	
+	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada) {
+		String sql = "INSERT INTO Peregrinos_paradas (id_peregrino, id_parada) VALUES (?, ?)";
+		try (Connection connection = con.getConexion(); 
+			PreparedStatement stmt = connection.prepareStatement(sql);
+			) {
+			stmt.setLong(1, idPeregrino);
+			stmt.setLong(2, idParada);
+			int rowsAffected = stmt.executeUpdate();
+			if (rowsAffected > 0) {
+				return Optional.of(idPeregrino);
+			}
+		} catch (SQLException e) {
+			logger.severe("Error al insertar peregrinos_paradas: " + e.getMessage());
+		}
+		return Optional.empty();
+	}
+	
 	public Optional<Parada> obtenerParadaPorNombre(String nombre) {
 		String paradaSql = "SELECT * FROM Paradas WHERE nombre = ?";
-
+		System.out.println("Parada" + nombre);
 		Parada parada = null;
 
 		try (Connection connection = con.getConexion();
@@ -87,6 +104,7 @@ public class ParadaDAO {
 					parada.setNombre(rs.getString("nombre"));
 					parada.setRegion(rs.getString("region").charAt(0));
 					parada.setResponsable(rs.getString("responsable"));
+					
 				}
 			}
 

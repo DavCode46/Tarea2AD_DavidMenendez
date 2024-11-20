@@ -36,7 +36,7 @@ public class ExportarCarnetXML {
      * @throws Exception Si ocurre un error durante la creación del archivo XML.
      */
     public void exportarCarnet(Peregrino peregrino) throws Exception {
-       
+       System.out.println(peregrino);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.newDocument();

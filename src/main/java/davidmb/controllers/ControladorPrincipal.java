@@ -105,6 +105,11 @@ public class ControladorPrincipal {
 		UsuariosController uc = new UsuariosController();
 		return uc.insertarUsuario(u);
 	}
+	
+	public Optional<Peregrino> obtenerPeregrinoPorIdUsuario(Long id) {
+		PeregrinosController pec = new PeregrinosController();
+		return pec.obtenerPeregrinoPorIdUsuario(id);
+	}
 
 
 	/**
@@ -116,7 +121,9 @@ public class ControladorPrincipal {
 	public Peregrino registrarPeregrino() {
 		ParadasController pc = new ParadasController();
 		PeregrinosController pec = new PeregrinosController();
+		CarnetsController cc = new CarnetsController();
 		Peregrino nuevoPeregrino = null;
+		Carnet carnet = null;
 		JOptionPane.showMessageDialog(null, "Formulario de registro de nuevo peregrino");
 
 		// Obtener datos del usuario
@@ -154,13 +161,24 @@ public class ControladorPrincipal {
 			nuevoPeregrino = obtenerDatosModificados(nombre, contrasenia, nacionalidad, parada);
 
 		}
-		Optional<Parada> paradaEncontradaOptional = pc.obtenerParadaPorNombre(nombre);
-		Parada paradaEncontrada = paradaEncontradaOptional.orElse(null);
+		Optional<Parada> paradaEncontradaOptional = pc.obtenerParadaPorNombre(parada);
 		
-		paradaEncontrada.getPeregrinos().add(nuevoPeregrino.getId());
+		Parada paradaEncontrada = paradaEncontradaOptional.orElse(null);
+		carnet = new Carnet(paradaEncontrada);
+		//paradaEncontrada.getPeregrinos().add(nuevoPeregrino.getId());
+		Optional<Long> idCarnetOptional = cc.insertarCarnet(carnet);
+		if(idCarnetOptional.isPresent()) {
+			JOptionPane.showMessageDialog(null, "Carnet creado correctamente");
+		} else {
+			JOptionPane.showMessageDialog(null, "Error al insertar correctamente");
+		}
 		Optional<Long> idPeregrinoOptional = pec.insertarPeregrino(nuevoPeregrino);
+		
+		
 		if(idPeregrinoOptional.isPresent()) {
 			JOptionPane.showMessageDialog(null, "Peregrino insertado correctamente");
+			nuevoPeregrino.setId(idPeregrinoOptional.get());
+			nuevoPeregrino.getCarnet().setId(idCarnetOptional.get());
 		} else {
 			JOptionPane.showMessageDialog(null, "Error al insertar correctamente");
 		}
@@ -198,8 +216,8 @@ public class ControladorPrincipal {
 				Optional<Long> idUsuario = uc.insertarUsuario(u);
 				Long idUsuarioValue = idUsuario.orElse(null);
 				Peregrino nuevoPeregrino = new Peregrino(nombre, nacionalidad, new Carnet(paradaObj), idUsuarioValue);
-				nuevoPeregrino.getParadas().add(paradaObj.getId());
-				paradaObj.getPeregrinos().add(nuevoPeregrino.getId());
+//				nuevoPeregrino.getParadas().add(paradaObj.getId());
+//				paradaObj.getPeregrinos().add(nuevoPeregrino.getId());
 				return nuevoPeregrino;
 			}
 		}
@@ -312,6 +330,11 @@ public class ControladorPrincipal {
 	public boolean paradaExiste(String nombre) {
 		ParadasController pc = new ParadasController();
 		return pc.paradaExiste(nombre);
+	}
+	
+	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada) {
+		ParadasController pc = new ParadasController();
+		return pc.insertarPeregrinosParadas(idPeregrino, idParada);
 	}
 
 	/**

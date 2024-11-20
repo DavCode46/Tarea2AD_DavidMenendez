@@ -47,21 +47,21 @@ public class UsuarioDAO {
 
 		try (Connection connection = con.getConexion();
 			PreparedStatement stmt = connection.prepareStatement(sql);
-			ResultSet rs = stmt.executeQuery();
+		
 			) {
 
 			stmt.setString(1, usuario);
 			stmt.setString(2, password);
 
-			if (rs.next()) {
-				u = new Usuario();
-				u.setId(rs.getLong("id"));
-				u.setNombreUsuario(rs.getString("usuario"));
-				// u.setPassword(rs.getString("password"));
-				u.setPerfil(rs.getString("perfil"));
-
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					u = new Usuario();
+					u.setId(rs.getLong("id"));
+					u.setNombreUsuario(rs.getString("usuario"));
+					// u.setPassword(rs.getString("password"));
+					u.setPerfil(rs.getString("perfil"));
+				}
 			}
-
 		} catch (SQLException ex) {
 			logger.severe("Error al buscar usuario: " + ex.getMessage());
 		}
@@ -71,17 +71,19 @@ public class UsuarioDAO {
 	public boolean validarCredenciales(String nombre, String password) {
 		String sql = "SELECT * FROM Usuarios WHERE usuario = ? AND password = ?";
 
+		System.out.println("Validando credenciales: " + nombre + ", " + password);
 		boolean ret = false;
 		try (Connection connection = con.getConexion();
 			PreparedStatement stmt = connection.prepareStatement(sql);
-			ResultSet rs = stmt.executeQuery();
 			) {
 
 			stmt.setString(1, nombre);
 			stmt.setString(2, password);
 
-			if (rs.next()) {
-				ret = true;
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					ret = true;
+				}
 			}
 
 		} catch (SQLException ex) {

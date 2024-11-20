@@ -23,6 +23,10 @@ public class ParadasService {
 		return paradaDAO.insertarParada(parada);
 	}
 	
+	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada) {
+		return paradaDAO.insertarPeregrinosParadas(idPeregrino, idParada);
+	}
+	
 	public Optional<Parada> obtenerParadaPorIdUsuario(Long idUsuario) {
 		return paradaDAO.obtenerParadaPorIdUsuario(idUsuario);
 	}

@@ -24,6 +24,10 @@ public class ParadasController {
 		return paradasService.insertarParada(parada);
 	}
 	
+	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada) {
+		return paradasService.insertarPeregrinosParadas(idPeregrino, idParada);
+	}
+	
 	public Optional<Parada> obtenerParadaPorIdUsuario(Long idUsuario) {
 		return paradasService.obtenerParadaPorIdUsuario(idUsuario);
 	}
