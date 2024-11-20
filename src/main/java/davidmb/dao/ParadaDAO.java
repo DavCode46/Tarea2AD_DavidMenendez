@@ -219,6 +219,23 @@ public class ParadaDAO {
 	    }
 	    return paradas;
 	}
+	
+	public boolean paradaExiste(String nombre) {
+		boolean existe = false;
+		String sql = "SELECT * FROM Paradas WHERE nombre = ?";
+
+		try (Connection connection = con.getConexion(); PreparedStatement stmt = connection.prepareStatement(sql)) {
+			stmt.setString(1, nombre);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					existe = true;
+				}
+			}
+		} catch (SQLException e) {
+			logger.severe("Error al buscar parada: " + e.getMessage());
+		}
+		return existe;
+	}	
 
 
 //	public static void main(String args[]) {

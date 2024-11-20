@@ -1,19 +1,16 @@
 package davidmb.controllers;
 
 import java.awt.BorderLayout;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JLabel;
@@ -100,140 +97,12 @@ public class ControladorPrincipal {
 
 		return (u != null) ? u.getId() : null;
 	}
-
-	 /**
-     * Calcula el siguiente ID disponible para un tipo específico de usuario.
-     * @param archivoCredenciales Archivo de credenciales.
-     * @param esPeregrino Si es true, considera solo usuarios peregrinos; si no, paradas.
-     * @return El siguiente ID disponible.
-     */
-	public Long obtenerSiguienteId(String archivoCredenciales, boolean esPeregrino) {
-		long maxId = 0;
-
-		try (BufferedReader br = new BufferedReader(new FileReader(archivoCredenciales))) {
-			String linea;
-			while ((linea = br.readLine()) != null) {
-				String[] credencial = linea.split(" ");
-
-				if (esPeregrino && credencial[2].startsWith("peregrino")) {
-					Long id = Long.parseLong(credencial[3]);
-					if (id > maxId) {
-						maxId = id;
-					}
-				} else if (!esPeregrino && credencial[2].startsWith("parada")) {
-					Long id = Long.parseLong(credencial[3]);
-					if (id > maxId) {
-						maxId = id;
-					}
-				}
-			}
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-
-		return maxId + 1;
+	
+	public boolean usuarioExiste(String usuario) {
+		UsuariosController uc = new UsuariosController();
+		return uc.usuarioExiste(usuario);
 	}
 
-	/**
-     * Carga las credenciales desde el archivo especificado.
-     * @param archivoCredenciales Ruta del archivo de credenciales.
-     */
-	private void cargarCredenciales(String archivoCredenciales) {
-		try (BufferedReader br = new BufferedReader(new FileReader(archivoCredenciales))) {
-			String linea;
-			while ((linea = br.readLine()) != null) {
-				String[] credencial = linea.split(" ");
-				String usuario = credencial[0];
-				String perfilString = credencial[2];
-				Perfil perfil = Perfil.valueOf(perfilString.toLowerCase());
-				Long id = Long.parseLong(credencial[3]);
-
-				Sesion nuevoUsuario = new Sesion(usuario, perfil, id);
-
-				credenciales.put(usuario, nuevoUsuario);
-			}
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
-
-	 /**
-     * Valida las credenciales de un usuario.
-     * @param archivoCredenciales Archivo de credenciales.
-     * @param nombreUsuario Nombre de usuario.
-     * @param contrasenia Contraseña del usuario.
-     * @return true si las credenciales son válidas; false en caso contrario.
-     */
-	public boolean validarCredenciales(String archivoCredenciales, String nombreUsuario, String contrasenia) {
-		try (BufferedReader br = new BufferedReader(new FileReader(archivoCredenciales))) {
-			String linea;
-			while ((linea = br.readLine()) != null) {
-				String[] credencial = linea.split(" ");
-				String usuario = credencial[0];
-				String contraseniaGuardada = credencial[1];
-
-				if (usuario.equals(nombreUsuario)) {
-
-					return contraseniaGuardada.equals(contrasenia);
-				}
-			}
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-		return false;
-	}
-
-	 /**
-     * Registra un nuevo usuario en el sistema.
-     * @param archivoCredenciales Archivo de credenciales.
-     * @param nombre Nombre del usuario.
-     * @param contrasenia Contraseña del usuario.
-     * @param perfilString Perfil del usuario como cadena.
-     * @param esPeregrino true si es peregrino; false si es una parada.
-     * @return true si el registro fue exitoso; false en caso contrario.
-     */
-	public boolean registrarCredenciales(String archivoCredenciales, String nombre, String contrasenia,
-			String perfilString, boolean esPeregrino) {
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivoCredenciales, true))) {
-			if (credenciales.containsKey(nombre)) {
-				JOptionPane.showMessageDialog(null, "El usuario ya existe");
-				return false;
-			}
-
-			Perfil perfil = Perfil.valueOf(perfilString.toLowerCase());
-			Long id;
-			if (esPeregrino) {
-				id = obtenerSiguienteId(archivoCredenciales, true);
-				Sesion nuevoUsuario = new Sesion(nombre, perfil, id);
-				credenciales.put(nombre, nuevoUsuario);
-			} else {
-				id = obtenerSiguienteId(archivoCredenciales, false);
-				Sesion nuevoUsuario = new Sesion(nombre, perfil, id);
-				credenciales.put(nombre, nuevoUsuario);
-			}
-			String usuarioFormateado = String.format("%s %s %s %,d", nombre, contrasenia, perfil, id);
-			bw.write(usuarioFormateado);
-			bw.newLine();
-			JOptionPane.showMessageDialog(null, "Usuario registrado con éxito\n" + "Nombre: " + nombre
-					+ "\nContraseña: " + contrasenia + "\nPerfil: " + perfil + "\nID: " + id);
-			return true;
-		} catch (FileNotFoundException ex) {
-			System.out.println("Fichero no encontrado");
-			return false;
-		} catch (IOException ex) {
-			ex.printStackTrace();
-			return false;
-		}
-	}
-
-	/**
-     * Inicia el proceso de registro para un nuevo peregrino.
-     * @return Objeto Peregrino registrado o null si el proceso se cancela.
-     */
-	public Peregrino registrarPeregrino() {
-
-		return registrarPeregrino(archivoParadas, archivoCredenciales);
-	}
 
 	/**
 	 * 	
@@ -241,7 +110,7 @@ public class ControladorPrincipal {
 	 * @param archivoCredenciales
 	 * @return
 	 */
-	private Peregrino registrarPeregrino(String archivoParadas, String archivoCredenciales) {
+	private Peregrino registrarPeregrino() {
 		Peregrino nuevoPeregrino = null;
 		JOptionPane.showMessageDialog(null, "Formulario de registro de nuevo peregrino");
 
@@ -264,7 +133,7 @@ public class ControladorPrincipal {
 		
 		String parada = "";
 		do {
-			parada = obtenerEntrada(mostrarParadas(archivoParadas, true), "Parada", false);
+			parada = obtenerEntrada(mostrarParadas(true), "Parada", false);
 			if(!paradaExiste(parada)){
 				JOptionPane.showMessageDialog(null, "La parada seleccionada no es válida.");
 			}
@@ -305,11 +174,11 @@ public class ControladorPrincipal {
 				JOptionPane.YES_NO_OPTION);
 		if (confirmacion == JOptionPane.YES_OPTION) {
 			// Datos correctos --> Continuar
-			if (validarCredenciales(archivoCredenciales, nombre, contrasenia)) {
+			if (usuarioExiste(nombre)) {
 				JOptionPane.showMessageDialog(null, "El usuario ya existe");
 				return null;
 			} else {
-				Long id = obtenerSiguienteId(archivoCredenciales, true);
+				
 				Parada paradaObj = obtenerParada(parada);
 				Peregrino nuevoPeregrino = new Peregrino(id, nombre, nacionalidad, new Carnet(id, paradaObj));
 				nuevoPeregrino.getParadas().add(paradaObj);
@@ -348,15 +217,15 @@ public class ControladorPrincipal {
 		if (nuevaNacionalidad == null)
 			return null;
 
-		String nuevaParada = obtenerEntrada(mostrarParadas(archivoParadas, true), parada, false);
+		String nuevaParada = obtenerEntrada(mostrarParadas(true), parada, false);
 		if (nuevaParada == null)
 			return null;
 
-		if (validarCredenciales(archivoCredenciales, nombre, contrasenia)) {
+		if (usuarioExiste(nombre)) {
 			JOptionPane.showMessageDialog(null, "El usuario ya existe");
 			return null;
 		} else {
-			Long id = obtenerSiguienteId(archivoCredenciales, true);
+			
 			Parada paradaObj = obtenerParada(parada);
 			Peregrino nuevoPeregrino = new Peregrino(id, nombre, nacionalidad, new Carnet(id, paradaObj));
 			nuevoPeregrino.getParadas().add(paradaObj);
@@ -367,26 +236,7 @@ public class ControladorPrincipal {
 		}
 	}
 
-	/**
-	 * Carga en el sistema las paradas disponibles
-	 * @param archivoParadas
-	 */
-	@SuppressWarnings("unchecked")
-	private void cargarParadas(String archivoParadas) {
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivoParadas))) {
-			paradas = (Map<String, Parada>) ois.readObject();
-		} catch (FileNotFoundException ex) {
-			System.out.println("No se ha encontrado el archivo de paradas. Creando uno nuevo...");
 
-			paradas = new HashMap<>();
-		} catch (EOFException ex) {
-			System.out.println("El archivo de paradas está vacío. Iniciando con un mapa vacío.");
-
-			paradas = new HashMap<>();
-		} catch (IOException | ClassNotFoundException ex) {
-			ex.printStackTrace();
-		}
-	}
 
 	/**
 	 * Sobreescribe el archivo paradas con las nuevas paradas introducidas 
@@ -408,35 +258,27 @@ public class ControladorPrincipal {
      * @return Lista de paradas formateada como cadena.
      */
 	@SuppressWarnings("unchecked")
-	public String mostrarParadas(String archivoParadas, boolean isPeregrino) {
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivoParadas))) {
-			Map<String, Parada> paradasLeidas = (Map<String, Parada>) ois.readObject();
+	public String mostrarParadas(boolean isPeregrino) {
+	    ParadasController controladorParada = new ParadasController();
+	    List<Parada> paradasLeidas = controladorParada.obtenerTodasParadas();
 
-			StringBuilder sb = new StringBuilder("Paradas registradas: \n");
+	    StringBuilder sb = new StringBuilder("Paradas registradas: \n");
 
-			for (Parada parada : paradasLeidas.values()) {
-				if (isPeregrino) {
-					sb.append("\nNombre: ").append(parada.getNombre());
-					sb.append("\nRegión: ").append(parada.getRegion());
-				} else {
+	    for (Parada parada : paradasLeidas) {
+	        if (isPeregrino) {
+	            sb.append("\nNombre: ").append(parada.getNombre());
+	            sb.append("\nRegión: ").append(parada.getRegion());
+	        } else {
+	            sb.append("\nID: ").append(parada.getId());
+	            sb.append("\nNombre: ").append(parada.getNombre());
+	            sb.append("\nRegión: ").append(parada.getRegion());
+	            sb.append("\nResponsable: ").append(parada.getResponsable());
+	        }
+	    }
 
-					sb.append("\nID: ").append(parada.getId());
-					sb.append("\nNombre: ").append(parada.getNombre());
-					sb.append("\nRegión: ").append(parada.getRegion());
-					sb.append("\nResponsable: ").append(parada.getResponsable());
-				}
-			}
-
-			return sb.toString();
-		} catch (FileNotFoundException ex) {
-			System.out.println("No se ha encontrado el archivo de paradas.");
-		} catch (EOFException ex) {
-			System.out.println("El archivo de paradas está vacío.");
-		} catch (IOException | ClassNotFoundException ex) {
-			ex.printStackTrace();
-		}
-		return "No se han encontrado paradas";
+	    return sb.toString();
 	}
+
 
 	 /**
      * Registra una nueva parada en el sistema.
