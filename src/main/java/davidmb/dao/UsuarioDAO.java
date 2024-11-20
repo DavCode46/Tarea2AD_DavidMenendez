@@ -66,9 +66,29 @@ public class UsuarioDAO {
 		}
 		return u;
 	}
+	
+	public boolean usuarioExiste(String usuario) {
+		boolean existe = false;
+		String sql = "SELECT * FROM Usuarios WHERE usuario = ?";
+		
+		try(Connection connection = con.getConexion();
+			PreparedStatement stmt = connection.prepareStatement(sql);
+			) {
+			stmt.setString(1, usuario); 
+	        try (ResultSet rs = stmt.executeQuery()) { 
+	            if (rs.next()) {
+	                existe = true; 
+	            }
+	        }
+			} catch (SQLException ex) {
+				logger.severe("Error al buscar usuario: " + ex.getMessage());
+			}
+		return existe;
+	}
 
-//	public static void main(String args[]) {
-//		UsuarioDAO uDAO = new UsuarioDAO();
+	public static void main(String args[]) {
+		UsuarioDAO uDAO = new UsuarioDAO();
+		System.out.println(uDAO.usuarioExiste("admin"));
 //		Usuario u = new Usuario("David", "david", "peregrino");
 //		
 //		uDAO.insertar(u);
@@ -78,6 +98,6 @@ public class UsuarioDAO {
 //		} else {
 //			System.out.println("Usuario no encontrado");
 //		}
-//	}
+	}
 
 }
