@@ -75,7 +75,7 @@ public class CarnetDAO {
 		return ret;
 	}
 
-	public Carnet obtenerCarnetPorId(Long id) {
+	public Optional<Carnet> obtenerCarnetPorId(Long id) {
 		 String sqlCarnet = "SELECT Carnets.id, Carnets.fechaexp, Carnets.distancia, Carnets.nvips, " +
                  "Paradas.id AS parada_id, Paradas.nombre AS parada_nombre, Paradas.region AS parada_region, Paradas.responsable AS parada_responsable " +
                  "FROM Carnets " +
@@ -107,12 +107,16 @@ public class CarnetDAO {
 					logger.info("Carnet obtenido: " + carnet);
 				}
 			}
+		
 
 		} catch (SQLException e) {
 			logger.severe("Error al obtener carnet: " + e.getMessage());
 		}
 
-		return carnet;
+		// Devuelve un Optional con el carnet si se ha encontrado, o un Optional vacío si no,
+		// es decir manejamos tanto optional.of() como optional.empty() en una sola línea
+		// lo que nos permite controlar null;
+		return Optional.ofNullable(carnet);
 	}
 	
 //	public static void main(String args[]) {

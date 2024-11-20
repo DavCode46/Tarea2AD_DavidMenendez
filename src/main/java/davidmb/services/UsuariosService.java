@@ -1,5 +1,7 @@
 package davidmb.services;
 
+import java.util.Optional;
+
 import davidmb.dao.UsuarioDAO;
 import davidmb.models.Usuario;
 
@@ -7,14 +9,23 @@ public class UsuariosService {
 	private UsuarioDAO usuarioDAO;
 	
 	public UsuariosService() {
-		usuarioDAO = new UsuarioDAO();
+        this(new UsuarioDAO());
 	}
 	
-	public Long insertarUsuario(Usuario u) {
+	public UsuariosService(UsuarioDAO usuarioDAO) {
+		super();
+		this.usuarioDAO = usuarioDAO;
+	}
+	
+	public Optional<Long> insertarUsuario(Usuario u) {
 		return usuarioDAO.insertarUsuario(u);
 	}
 	
-	public Usuario login(String nombreUsuario, String password) {
+	public Optional<Usuario> login(String nombreUsuario, String password) {
 		return usuarioDAO.login(nombreUsuario, password);
+	}
+	
+	public boolean usuarioExiste(String usuario) {
+		return usuarioDAO.usuarioExiste(usuario);
 	}
 }

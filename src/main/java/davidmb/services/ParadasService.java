@@ -11,14 +11,19 @@ public class ParadasService {
 	private ParadaDAO paradaDAO;
 	
 	public ParadasService() {
-		this.paradaDAO = new ParadaDAO();
+		this(new ParadaDAO());
+	}
+	
+	public ParadasService(ParadaDAO paradaDAO) {
+		super();
+		this.paradaDAO = paradaDAO;
 	}
 	
 	public Optional<Long> insertarParada(Parada parada) {
 		return paradaDAO.insertarParada(parada);
 	}
 	
-	public Parada obtenerParadaPorIdUsuario(Long idUsuario) {
+	public Optional<Parada> obtenerParadaPorIdUsuario(Long idUsuario) {
 		return paradaDAO.obtenerParadaPorIdUsuario(idUsuario);
 	}
 	

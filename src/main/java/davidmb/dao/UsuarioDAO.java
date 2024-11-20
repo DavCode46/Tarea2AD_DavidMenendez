@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import davidmb.models.Usuario;
@@ -13,7 +14,7 @@ public class UsuarioDAO {
 	private static final Logger logger = Logger.getLogger(UsuarioDAO.class.getName());
 	ConexionDB con = ConexionDB.getInstancia();
 
-	public Long insertarUsuario(Usuario u) {
+	public Optional<Long> insertarUsuario(Usuario u) {
 		String sqlUsuario = "INSERT INTO Usuarios (usuario, password, perfil) VALUES (?, ?, ?)";
 		Long idUsuario = null;
 
@@ -37,10 +38,10 @@ public class UsuarioDAO {
 		} catch (SQLException ex) {
 			logger.severe("Error al insertar usuario: " + ex.getMessage());
 		}
-		return idUsuario; // Retorna el ID generado
+		return Optional.ofNullable(idUsuario); // Retorna el ID generado
 	}
 
-	public Usuario login(String usuario, String password) {
+	public Optional<Usuario> login(String usuario, String password) {
 		Usuario u = null;
 		String sql = "SELECT * FROM Usuarios WHERE usuario = ? AND password = ?";
 
@@ -64,7 +65,7 @@ public class UsuarioDAO {
 		} catch (SQLException ex) {
 			logger.severe("Error al buscar usuario: " + ex.getMessage());
 		}
-		return u;
+		return Optional.ofNullable(u);
 	}
 	
 	public boolean usuarioExiste(String usuario) {

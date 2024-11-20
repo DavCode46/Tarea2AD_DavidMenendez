@@ -8,20 +8,25 @@ import davidmb.models.Peregrino;
 
 public class PeregrinosService {
 	private PeregrinoDAO peregrinoDAO;
-
+	
 	public PeregrinosService() {
-		peregrinoDAO = new PeregrinoDAO();
+        this(new PeregrinoDAO());
+	}
+
+	public PeregrinosService(PeregrinoDAO peregrinoDAO) {
+		super();
+		this.peregrinoDAO = peregrinoDAO;
 	}
 
 	public Optional<Long> insertarPeregrino(Peregrino p) {
 		return peregrinoDAO.insertarPeregrino(p);
 	}
 
-	public Peregrino obtenerPeregrinoPorId(Long id) {
+	public Optional<Peregrino> obtenerPeregrinoPorId(Long id) {
 		return peregrinoDAO.obtenerPeregrinoPorId(id);
 	}
 
-	public Peregrino obtenerPeregrinoPorIdUsuario(Long id) {
+	public Optional<Peregrino> obtenerPeregrinoPorIdUsuario(Long id) {
 		return peregrinoDAO.obtenerPeregrinoPorIdUsuario(id);
 	}
 	

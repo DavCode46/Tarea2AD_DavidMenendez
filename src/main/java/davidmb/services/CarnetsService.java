@@ -9,7 +9,12 @@ public class CarnetsService {
 	private CarnetDAO carnetDAO;
 	
 	public CarnetsService() {
-		this.carnetDAO = new CarnetDAO();
+		this(new CarnetDAO());
+	}
+	
+	public CarnetsService(CarnetDAO carnetDAO) {
+		super();
+		this.carnetDAO = carnetDAO;
 	}
 	
 	public Optional<Long> insertarCarnet(Carnet carnet) {
@@ -20,7 +25,7 @@ public class CarnetsService {
 		return carnetDAO.modificarCarnet(carnet);
 	}
 	
-	public Carnet obtenerCarnetPorId(Long id) {
+	public Optional<Carnet> obtenerCarnetPorId(Long id) {
 		return carnetDAO.obtenerCarnetPorId(id);
 	}
 }

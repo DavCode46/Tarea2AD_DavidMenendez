@@ -47,7 +47,7 @@ public class ParadaDAO {
 		return Optional.empty();
 	}
 
-	public Parada obtenerParadaPorIdUsuario(Long id) {
+	public Optional<Parada> obtenerParadaPorIdUsuario(Long id) {
 		String paradaSql = "SELECT * FROM Paradas WHERE id_usuario = ?";
 
 		Parada parada = null;
@@ -69,7 +69,7 @@ public class ParadaDAO {
 		} catch (SQLException e) {
 			logger.severe("Error al obtener parada por id de usuario: " + e.getMessage());
 		}
-		return parada;
+		return Optional.ofNullable(parada);
 	}
 
 	public List<Peregrino> obtenerPeregrinosParada(Long idParada) {

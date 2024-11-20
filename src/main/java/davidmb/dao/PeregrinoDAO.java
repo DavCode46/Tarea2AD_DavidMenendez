@@ -70,7 +70,7 @@ public class PeregrinoDAO {
 		return Optional.empty();
 	}
 
-	public Peregrino obtenerPeregrinoPorId(Long id) {
+	public Optional<Peregrino> obtenerPeregrinoPorId(Long id) {
 		String sqlPeregrino = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_carnet, p.id_usuario, "
 				+ "c.id AS carnet_id, c.parada_inicial, c.fechaexp, c.distancia, c.nvips, "
 				+ "pa.id AS parada_id, pa.nombre AS parada_nombre, pa.region, pa.responsable " + "FROM Peregrinos p "
@@ -146,10 +146,10 @@ public class PeregrinoDAO {
 			e.printStackTrace();
 		}
 
-		return peregrino;
+		return Optional.ofNullable(peregrino);
 	}
 
-	public Peregrino obtenerPeregrinoPorIdUsuario(Long id) {
+	public Optional<Peregrino> obtenerPeregrinoPorIdUsuario(Long id) {
 	    String sqlPeregrino = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_carnet, p.id_usuario, "
 	            + "c.id AS carnet_id, c.parada_inicial, c.fechaexp, c.distancia, c.nvips, "
 	            + "pa.id AS parada_id, pa.nombre AS parada_nombre, pa.region, pa.responsable "
@@ -232,7 +232,7 @@ public class PeregrinoDAO {
 	        
 	    }
 
-	    return peregrino;
+	    return Optional.ofNullable(peregrino);
 	}
 
 

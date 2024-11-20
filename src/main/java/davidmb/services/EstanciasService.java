@@ -9,7 +9,12 @@ public class EstanciasService {
 	private EstanciaDAO estanciaDAO;
 	
 	public EstanciasService() {
-		estanciaDAO = new EstanciaDAO();
+        this(new EstanciaDAO());
+	}
+	
+	public EstanciasService(EstanciaDAO estanciaDAO) {
+		super();
+		this.estanciaDAO = estanciaDAO;
 	}
 	
 	public boolean insertarEstancia(Estancia estancia) {
