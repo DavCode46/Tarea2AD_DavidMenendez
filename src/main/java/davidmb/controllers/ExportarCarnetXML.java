@@ -151,7 +151,7 @@ public class ExportarCarnetXML {
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         DOMSource source = new DOMSource(doc);
         
-        StreamResult result = new StreamResult(new File("exports/" + peregrino.getNombre() + ".xml"));
+        StreamResult result = new StreamResult(new File("exports/peregrinos/" + peregrino.getNombre() + ".xml"));
         transformer.transform(source, result);
 
         JOptionPane.showMessageDialog(null, "Carnet exportado con éxito en formato XML.");

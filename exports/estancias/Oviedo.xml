@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<parada>
+    <id>2</id>
+    <parada>Oviedo</parada>
+    <region>N</region>
+    <fecha-inicio>2020-10-10</fecha-inicio>
+    <fecha-fin>2025-10-10</fecha-fin>
+    <estancias>
+        <estancia>
+            <id>2</id>
+            <peregrino>Juan Pérez</peregrino>
+            <fecha>2024-01-03</fecha>
+            <vip>No</vip>
+        </estancia>
+        <estancia>
+            <id>6</id>
+            <peregrino>Laura García</peregrino>
+            <fecha>2024-02-02</fecha>
+            <vip>No</vip>
+        </estancia>
+    </estancias>
+</parada>

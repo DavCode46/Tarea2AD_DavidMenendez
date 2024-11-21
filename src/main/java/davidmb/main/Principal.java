@@ -2,6 +2,7 @@ package davidmb.main;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -9,6 +10,8 @@ import javax.swing.JOptionPane;
 
 import davidmb.controllers.ControladorPrincipal;
 import davidmb.controllers.ExportarCarnetXML;
+import davidmb.controllers.ExportarEstanciasPeregrinosXML;
+import davidmb.models.Parada;
 import davidmb.models.Peregrino;
 import davidmb.models.Perfil;
 import davidmb.models.Usuario;
@@ -44,6 +47,7 @@ public class Principal {
 		ControladorPrincipal sistema = new ControladorPrincipal();
 
 		Peregrino p = null;
+		Parada parada = null;
 		Properties prop = new Properties();
 
 		try (FileInputStream input = new FileInputStream("src/main/resources/application.properties")) {
@@ -93,14 +97,24 @@ public class Principal {
 
 						Optional<Usuario> usuarioOptional = sistema.login(nombreUsuario, contrasenia);
 						if (usuarioOptional.isPresent()) {
-							Optional<Peregrino> peregrinoOptional = sistema.obtenerPeregrinoPorIdUsuario(usuarioOptional.get().getId());
-							if (peregrinoOptional.isPresent()) {
-								p = peregrinoOptional.get();
+							if (usuarioOptional.get().getPerfil().equalsIgnoreCase("peregrino")) {
+								Optional<Peregrino> peregrinoOptional = sistema
+										.obtenerPeregrinoPorIdUsuario(usuarioOptional.get().getId());
+								if (peregrinoOptional.isPresent()) {
+									p = peregrinoOptional.get();
+								}
+							} else if (usuarioOptional.get().getPerfil().equalsIgnoreCase("parada")) {
+								Optional<Parada> paradaOptional = sistema
+										.obtenerParadaPorIdUsuario(usuarioOptional.get().getId());
+								if (paradaOptional.isPresent()) {
+									parada = paradaOptional.get();
+								}
 							}
+
 							Usuario u = usuarioOptional.get();
 							userActivo = new Sesion(u.getNombreUsuario(), Perfil.valueOf(u.getPerfil()), u.getId());
 						}
-						
+
 						JOptionPane.showMessageDialog(null, "Bienvenido " + nombreUsuario + "!\nPerfil: "
 								+ userActivo.getPerfil() + "\nID: " + userActivo.getId());
 					} else {
@@ -119,7 +133,7 @@ public class Principal {
 					}
 					case parada: {
 						// Implementación futura --> Opciones responsable de parada...
-						// mostrarOpcionesParada();
+						mostrarOpcionesParada(parada, sistema);
 						JOptionPane.showMessageDialog(null, "Sección en desarrollo...");
 						break;
 					}
@@ -138,12 +152,13 @@ public class Principal {
 
 				if (p != null) {
 					userActivo = new Sesion(p.getNombre(), Perfil.peregrino, p.getId());
-					String mensajeBienvenida = String.format("Sus datos:\n" + "ID: %s\n" + "Nombre: %s\n"
-							+ "Nacionalidad: %s\n" + "Fecha de expedición del carnet: %s\n" + "Parada inicial: %s\n"
-							+ "Distancia recorrida: %.2f km\n" + "Número de VIPS: %d\n",
+					String mensajeBienvenida = String.format(
+							"Sus datos:\n" + "ID: %s\n" + "Nombre: %s\n" + "Nacionalidad: %s\n"
+									+ "Fecha de expedición del carnet: %s\n" + "Parada inicial: %s\n"
+									+ "Distancia recorrida: %.2f km\n" + "Número de VIPS: %d\n",
 							p.getId(), p.getNombre(), p.getNacionalidad(), p.getCarnet().getFechaExp(),
-						    p.getCarnet().getParadaInicial().getNombre(),
-							p.getCarnet().getDistancia(), p.getCarnet().getnVips());
+							p.getCarnet().getParadaInicial().getNombre(), p.getCarnet().getDistancia(),
+							p.getCarnet().getnVips());
 					JOptionPane.showMessageDialog(null, mensajeBienvenida);
 					ExportarCarnetXML exportar = new ExportarCarnetXML();
 					try {
@@ -297,7 +312,7 @@ public class Principal {
 					if (!sistema.validarCredenciales(responsable, contraseniaResponsable)) {
 
 						sistema.registrarParada(nombreParada, region, responsable);
-						Usuario u = new Usuario(responsable, contraseniaResponsable, "responsable");	
+						Usuario u = new Usuario(responsable, contraseniaResponsable, "responsable");
 						sistema.insertarUsuario(u);
 					} else {
 						JOptionPane.showMessageDialog(null,
@@ -323,6 +338,67 @@ public class Principal {
 				JOptionPane.showMessageDialog(null, "Opción no válida.");
 			}
 		} while (true);
+	}
+
+	public static void mostrarOpcionesParada(Parada parada, ControladorPrincipal sistema) {
+		/**
+		 * CU3: Exportar datos Parada: el responsable de una parada podrá exportar los
+		 * datos de las estancias de los peregrinos de su parada, en un rango de fechas
+		 * concreto. Se reflejarán los datos de la parada (id, nombre, región), el rango
+		 * de fechas seleccionado y posteriormente la lista de las estancias de los
+		 * peregrinos en ese periodo, indicando el id de la estancia, el nombre del
+		 * peregrino, la fecha en que se realizó y si fue de tipo VIP o no.
+		 */
+
+		JOptionPane.showMessageDialog(null, "Bienvenido " + parada.getNombre() + "!\nPerfil: " + userActivo.getPerfil()
+				+ "\nID: " + userActivo.getId());
+		String opcion = "";
+		MENU: do {
+			String menu = "1. Exportar estancias\n" + "2. Sellar carnet\n" + "0. Cerrar sesión\n";
+			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true);
+			if (opcion == null) {
+				JOptionPane.showMessageDialog(null, "Selecciona una opción.");
+				continue;
+			}
+			switch (opcion) {
+			case "1": {
+				LocalDate fechaInicio = sistema.obtenerEntradaFecha("Introduce la fecha de inicio", "Fecha de Inicio");
+				LocalDate fechaFin = sistema.obtenerEntradaFecha("Introduce la fecha de Fin", "Fecha de Fin");
+
+				ExportarEstanciasPeregrinosXML exportarEstancias = new ExportarEstanciasPeregrinosXML(fechaInicio,
+						fechaFin, parada);
+
+				try {
+					exportarEstancias.exportarEstancias();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				break;
+			}
+			case "2": {
+				// Sellar carnet
+				break;
+			}
+			case "0": {
+				JOptionPane.showMessageDialog(null, "Has cerrado sesión");
+				break MENU;
+			}
+			}
+
+		} while (true);
+
+		/**
+		 * CU5: Sellar/Alojarse: un administrador de parada recibe a un peregrino que
+		 * llega en su ruta a su parada. Le pide su carnet de peregrino, se sella su
+		 * paso por esa parada y se le pregunta si desea una estancia (VIP o no) en esa
+		 * parada para el día actual. Se registran los datos en a BD, y si es el caso,
+		 * también para una nueva estancia de ese peregrino en esa parada en esa fecha.
+		 * Consecuentemente, esta información pasará a estar disponible también en los
+		 * datos de la parada y del peregrino, actualizando los datos de éste relativos
+		 * a la distancia recorrida (sumando los kms. desde la parada anterior) y al nº
+		 * total de estancias VIP.
+		 */
 	}
 
 }

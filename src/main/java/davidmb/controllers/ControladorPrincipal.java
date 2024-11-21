@@ -3,6 +3,9 @@ package davidmb.controllers;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,6 +115,16 @@ public class ControladorPrincipal {
 		return pec.obtenerPeregrinoPorIdUsuario(id);
 	}
 	
+	public Optional<Peregrino> obtenerPeregrinoPorId(Long id) {
+		PeregrinosController pec = new PeregrinosController();
+		return pec.obtenerPeregrinoPorId(id);
+	}
+	
+	public Optional<Parada> obtenerParadaPorIdUsuario(Long id) {
+		ParadasController pc = new ParadasController();
+		return pc.obtenerParadaPorIdUsuario(id);
+	}
+	
 	public List<Parada> obtenerParadasPorIdPeregrino(Long idPeregrino) {
 		ParadasController pc = new ParadasController();
 		return pc.obtenerParadasPorIdPeregrino(idPeregrino);
@@ -120,6 +133,11 @@ public class ControladorPrincipal {
 	public List<Estancia> obtenerEstanciasPorIdPeregrino(Long idPeregrino) {
 		EstanciasController ec = new EstanciasController();
 		return ec.obtenerEstanciasPorIdPeregrino(idPeregrino);
+	}
+	
+	public List<Estancia> obtenerEstanciasPorIdParada(Long idParada) {
+		EstanciasController ec = new EstanciasController();
+		return ec.obtenerEstanciasPorIdParada(idParada);
 	}
 	
 	public Optional<Parada> obtenerParadaPorId(Long id) {
@@ -515,7 +533,42 @@ public class ControladorPrincipal {
 		} while (!validarStr(entrada, esMenu));
 		return entrada.trim();
 	}
+	
+	 public LocalDate obtenerEntradaFecha(String mensaje, String titulo) {
+		 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	        LocalDate fecha = null;
 
+	        while (fecha == null) {
+	            try {
+	                String entrada = JOptionPane.showInputDialog(null, mensaje, titulo, JOptionPane.QUESTION_MESSAGE);
+
+	                if (entrada == null || entrada.trim().isEmpty()) {
+	                    JOptionPane.showMessageDialog(null, "La fecha no puede estar vacía. Por favor, intente de nuevo.", 
+	                                                  "Error", JOptionPane.ERROR_MESSAGE);
+	                    continue;
+	                }
+
+	               fecha = LocalDate.parse(entrada.trim(), formatter);
+	            } catch (DateTimeParseException e) {
+	                JOptionPane.showMessageDialog(null, "Formato de fecha inválido. Use el formato yyyy-MM-dd.", 
+	                                              "Error", JOptionPane.ERROR_MESSAGE);
+	            }
+	        }
+
+	        return fecha;
+	    }
+	 
+	 public boolean validarFechas(LocalDate fechaInicio, LocalDate fechaFin) {
+	        if (fechaInicio.isAfter(fechaFin)) {
+	            JOptionPane.showMessageDialog(null,
+	                    "La fecha de inicio no puede ser posterior a la fecha de fin. Por favor, intente de nuevo.",
+	                    "Error", JOptionPane.ERROR_MESSAGE);
+	            return false;
+	        }
+	        return true;
+	    }
+	 
+	 
 	 /**
      * Obtiene el valor de un nodo XML específico.
      * @param etiqueta Nombre de la etiqueta.
