@@ -30,6 +30,9 @@ public class ParadasService {
 	public List<Parada> obtenerParadasPorIdPeregrino(Long idPeregrino) {
 		return paradaDAO.obtenerParadasPorIdPeregrino(idPeregrino);
 	}
+	public Optional<Parada> obtenerParadaPorId(Long id) {
+		return paradaDAO.obtenerParadaPorId(id);
+	}
 	
 	public Optional<Parada> obtenerParadaPorIdUsuario(Long idUsuario) {
 		return paradaDAO.obtenerParadaPorIdUsuario(idUsuario);

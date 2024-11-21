@@ -32,6 +32,10 @@ public class ParadasController {
         return paradasService.obtenerParadasPorIdPeregrino(idPeregrino);
     }
 	
+	public Optional<Parada> obtenerParadaPorId(Long id) {
+		return paradasService.obtenerParadaPorId(id);
+	}
+	
 	public Optional<Parada> obtenerParadaPorIdUsuario(Long idUsuario) {
 		return paradasService.obtenerParadaPorIdUsuario(idUsuario);
 	}

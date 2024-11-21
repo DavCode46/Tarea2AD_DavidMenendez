@@ -3,6 +3,7 @@ package davidmb.controllers;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
@@ -39,13 +40,9 @@ public class ExportarCarnetXML {
     public void exportarCarnet(Peregrino peregrino) throws Exception {
     	ControladorPrincipal sistema = new ControladorPrincipal();
     	List<Estancia> listaEstancias = sistema.obtenerEstanciasPorIdPeregrino(peregrino.getId());
-		for (Estancia e : listaEstancias) {
-			System.out.println(e);
-		}
     	List<Parada> listaParadas = sistema.obtenerParadasPorIdPeregrino(peregrino.getId());
-    	        for (Parada p : listaParadas) {
-    	        	        	            System.out.println(p);
-    	        }
+    	
+    	       
        
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -118,6 +115,11 @@ public class ExportarCarnetXML {
        
         Element estanciasElem = doc.createElement("estancias");
         for (Estancia estancia : listaEstancias) {
+        	Optional<Parada> paradaOptional = sistema.obtenerParadaPorId(estancia.getParada());
+        	Parada paradaObtenida = null;
+        	if(paradaOptional.isPresent()) {
+        		paradaObtenida = paradaOptional.get();
+        	}
             Element estanciaElem = doc.createElement("estancia");
 
             Element idEstanciaElem = doc.createElement("id");
@@ -129,7 +131,7 @@ public class ExportarCarnetXML {
             estanciaElem.appendChild(fechaElem);
 
             Element paradaEstanciaElem = doc.createElement("parada");
-            paradaEstanciaElem.setTextContent(estancia.getParada().getNombre());
+            paradaEstanciaElem.setTextContent(paradaObtenida.getNombre());
             estanciaElem.appendChild(paradaEstanciaElem);
 
            

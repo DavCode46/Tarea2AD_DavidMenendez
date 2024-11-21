@@ -46,6 +46,28 @@ public class ParadaDAO {
 		}
 		return Optional.empty();
 	}
+	
+	public Optional<Parada> obtenerParadaPorId(Long id){
+		String sql = "SELECT * FROM Paradas WHERE id = ?";
+		Parada parada = null;
+		try(Connection connection = con.getConexion();
+			PreparedStatement stmt = connection.prepareStatement(sql);
+			) {
+			stmt.setLong(1, id);
+			try(ResultSet rs = stmt.executeQuery()) {
+				if(rs.next()) {
+					parada = new Parada();
+					parada.setId(rs.getLong("id"));
+					parada.setNombre(rs.getString("nombre"));
+					parada.setRegion(rs.getString("region").charAt(0));
+					parada.setResponsable(rs.getString("responsable"));
+				}
+			}
+		}catch(SQLException ex) {
+			logger.severe("Error al recuperar la parada: " + ex.getMessage());
+		}
+		return Optional.ofNullable(parada);
+	}
 
 	public Optional<Parada> obtenerParadaPorIdUsuario(Long id) {
 		String paradaSql = "SELECT * FROM Paradas WHERE id_usuario = ?";

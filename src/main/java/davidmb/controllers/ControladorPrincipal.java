@@ -121,6 +121,11 @@ public class ControladorPrincipal {
 		EstanciasController ec = new EstanciasController();
 		return ec.obtenerEstanciasPorIdPeregrino(idPeregrino);
 	}
+	
+	public Optional<Parada> obtenerParadaPorId(Long id) {
+		ParadasController pc = new ParadasController();
+		return pc.obtenerParadaPorId(id);
+	}
 
 
 	/**
@@ -180,6 +185,7 @@ public class ControladorPrincipal {
 		Optional<Long> idCarnetOptional = cc.insertarCarnet(carnet);
 		if(idCarnetOptional.isPresent()) {
 			JOptionPane.showMessageDialog(null, "Carnet creado correctamente");
+			
 		} else {
 			JOptionPane.showMessageDialog(null, "Error al insertar correctamente");
 		}
