@@ -211,13 +211,15 @@ public class ControladorPrincipal {
 			// Confirmar los datos
 			nuevoPeregrino = confirmarDatos(nombre, nombreUsuario, contrasenia, nacionalidad, parada);
 
-			if (nuevoPeregrino == null) {
-				// Si la confirmación falla, pedir nuevos datos
+			do {
+				if (nuevoPeregrino == null) {
+					// Si la confirmación falla, pedir nuevos datos
 
-				nuevoPeregrino = obtenerDatosModificados(nombre, nombreUsuario, contrasenia, nacionalidad, parada);
+					nuevoPeregrino = obtenerDatosModificados(nombre, nombreUsuario, contrasenia, nacionalidad, parada);
 
-			}
-			if(!pec.nombrePeregrinoExiste(nombre)) {
+				}
+			} while (nuevoPeregrino == null);
+			if (!pec.nombrePeregrinoExiste(nombre)) {
 				Optional<Parada> paradaEncontradaOptional = pc.obtenerParadaPorNombre(parada);
 
 				Parada paradaEncontrada = null;
@@ -245,7 +247,7 @@ public class ControladorPrincipal {
 			} else {
 				JOptionPane.showMessageDialog(null, "El peregrino ya existe", "Error", JOptionPane.ERROR_MESSAGE);
 			}
-			
+
 		} while (pec.nombrePeregrinoExiste(nombre));
 		return nuevoPeregrino;
 	}
@@ -261,7 +263,8 @@ public class ControladorPrincipal {
 	 * @param archivoCredenciales
 	 * @return Peregrino con los datos introducidos por el usuario
 	 */
-	private Peregrino confirmarDatos(String nombre,String nombreUsuario, String contrasenia, String nacionalidad, String parada) {
+	private Peregrino confirmarDatos(String nombre, String nombreUsuario, String contrasenia, String nacionalidad,
+			String parada) {
 		UsuariosController uc = new UsuariosController();
 		ParadasController pc = new ParadasController();
 		String mensajeFormateado = String.format("Verifica que los datos son correctos \n" + "Nombre: %s \n"
@@ -303,14 +306,15 @@ public class ControladorPrincipal {
 	 * @param parada
 	 * @return Peregrino con los datos modificados
 	 */
-	private Peregrino obtenerDatosModificados(String nombre,String nombreUsuario, String contrasenia, String nacionalidad, String parada) {
+	private Peregrino obtenerDatosModificados(String nombre, String nombreUsuario, String contrasenia,
+			String nacionalidad, String parada) {
 		UsuariosController uc = new UsuariosController();
 		ParadasController pc = new ParadasController();
 		// Pide los nuevos datos al usuario
 		String nuevoNombre = obtenerEntrada("Ingrese su nuevo nombre", nombre, false, false);
 		if (nuevoNombre == null)
 			return null;
-		
+
 		String nuevoNombreUsuario = obtenerEntrada("Ingrese su nuevo nombre de usuario", nombreUsuario, false, true);
 		if (nuevoNombreUsuario == null)
 			return null;
@@ -327,7 +331,7 @@ public class ControladorPrincipal {
 		if (nuevaParada == null)
 			return null;
 
-		if (uc.usuarioExiste(nombreUsuario)) {
+		if (uc.usuarioExiste(nuevoNombreUsuario)) {
 			JOptionPane.showMessageDialog(null, "El usuario ya existe", "Error", JOptionPane.ERROR_MESSAGE);
 			return null;
 		} else {
@@ -337,7 +341,8 @@ public class ControladorPrincipal {
 			Usuario u = new Usuario(nuevoNombreUsuario, nuevaContrasenia, "peregrino");
 			Optional<Long> idUsuario = uc.insertarUsuario(u);
 			Long idUsuarioValue = idUsuario.orElse(null);
-			Peregrino nuevoPeregrino = new Peregrino(nuevoNombre, nuevaNacionalidad, new Carnet(paradaObj), idUsuarioValue);
+			Peregrino nuevoPeregrino = new Peregrino(nuevoNombre, nuevaNacionalidad, new Carnet(paradaObj),
+					idUsuarioValue);
 			nuevoPeregrino.getParadas().add(paradaObj.getId());
 			paradaObj.getPeregrinos().add(nuevoPeregrino.getId());
 			return nuevoPeregrino;

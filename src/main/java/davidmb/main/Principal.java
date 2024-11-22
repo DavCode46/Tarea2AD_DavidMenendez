@@ -116,8 +116,8 @@ public class Principal {
 							userActivo = new Sesion(u.getNombreUsuario(), Perfil.valueOf(u.getPerfil()), u.getId());
 						}
 
-						JOptionPane.showMessageDialog(null, "Bienvenido " + nombreUsuario + "!\nPerfil: "
-								+ userActivo.getPerfil() + "\nID: " + userActivo.getId());
+//						JOptionPane.showMessageDialog(null, "Bienvenido " + nombreUsuario + "!\nPerfil: "
+//								+ userActivo.getPerfil() + "\nID: " + userActivo.getId());
 					} else {
 						JOptionPane.showMessageDialog(null, "Credenciales incorrectas.");
 						continue;
@@ -135,7 +135,6 @@ public class Principal {
 					case parada: {
 						// Implementación futura --> Opciones responsable de parada...
 						mostrarOpcionesParada(parada, sistema);
-						JOptionPane.showMessageDialog(null, "Sección en desarrollo...");
 						break;
 					}
 					default: {
@@ -363,8 +362,12 @@ public class Principal {
 			}
 			switch (opcion) {
 			case "1": {
-				LocalDate fechaInicio = sistema.obtenerEntradaFecha("Introduce la fecha de inicio", "Fecha de Inicio");
-				LocalDate fechaFin = sistema.obtenerEntradaFecha("Introduce la fecha de Fin", "Fecha de Fin");
+				LocalDate fechaInicio;
+				LocalDate fechaFin;
+				do {
+					fechaInicio = sistema.obtenerEntradaFecha("Introduce la fecha de inicio", "Fecha de Inicio");
+					fechaFin = sistema.obtenerEntradaFecha("Introduce la fecha de Fin", "Fecha de Fin");
+				}while(!sistema.validarFechas(fechaInicio, fechaFin));
 
 				ExportarEstanciasPeregrinosXML exportarEstancias = new ExportarEstanciasPeregrinosXML(fechaInicio,
 						fechaFin, parada);
@@ -405,6 +408,7 @@ public class Principal {
 					JOptionPane.showMessageDialog(null, "Parada registrada correctamente", "Parada registrada", JOptionPane.INFORMATION_MESSAGE);
 				} else {
 					JOptionPane.showMessageDialog(null, "Error al registrar la parada", "Error", JOptionPane.ERROR_MESSAGE);
+					return;
 				}
 				peregrino.getCarnet().setDistancia(50);
 				

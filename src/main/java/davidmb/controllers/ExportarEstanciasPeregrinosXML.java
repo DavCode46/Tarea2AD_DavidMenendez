@@ -100,25 +100,27 @@ public class ExportarEstanciasPeregrinosXML {
 				p = peregrinoOptional.get();
 			}
 
-			Element estanciaElem = doc.createElement("estancia");
+			if((e.getFecha().minusDays(-1).isAfter(fechaInicio)) && e.getFecha().isBefore(fechaFin)) {
+				Element estanciaElem = doc.createElement("estancia");
 
-			Element idEstanciaElem = doc.createElement("id");
-			idEstanciaElem.setTextContent(String.valueOf(e.getId()));
-			estanciaElem.appendChild(idEstanciaElem);
+				Element idEstanciaElem = doc.createElement("id");
+				idEstanciaElem.setTextContent(String.valueOf(e.getId()));
+				estanciaElem.appendChild(idEstanciaElem);
 
-			Element peregrinoElem = doc.createElement("peregrino");
-			peregrinoElem.setTextContent(p.getNombre());
-			estanciaElem.appendChild(peregrinoElem);
+				Element peregrinoElem = doc.createElement("peregrino");
+				peregrinoElem.setTextContent(p.getNombre());
+				estanciaElem.appendChild(peregrinoElem);
 
-			Element fechaEstanciaElem = doc.createElement("fecha");
-			fechaEstanciaElem.setTextContent(e.getFecha().toString());
-			estanciaElem.appendChild(fechaEstanciaElem);
+				Element fechaEstanciaElem = doc.createElement("fecha");
+				fechaEstanciaElem.setTextContent(e.getFecha().toString());
+				estanciaElem.appendChild(fechaEstanciaElem);
 
-			Element vipElem = doc.createElement("vip");
-			vipElem.setTextContent(e.isVip() ? "Sí" : "No");
-			estanciaElem.appendChild(vipElem);
+				Element vipElem = doc.createElement("vip");
+				vipElem.setTextContent(e.isVip() ? "Sí" : "No");
+				estanciaElem.appendChild(vipElem);
 
-			estanciasElem.appendChild(estanciaElem);
+				estanciasElem.appendChild(estanciaElem);
+			}
 
 		}
 
