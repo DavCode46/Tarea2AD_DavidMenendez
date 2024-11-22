@@ -169,10 +169,8 @@ public class ControladorPrincipal {
 	public Peregrino registrarPeregrino() {
 		ParadasController pc = new ParadasController();
 		PeregrinosController pec = new PeregrinosController();
-		UsuariosController uc = new UsuariosController();
 		CarnetsController cc = new CarnetsController();
-		Peregrino nuevoPeregrino = null;
-		Usuario usuario = null;
+		Peregrino nuevoPeregrino = null;	
 		Carnet carnet = null;
 		String nombre;
 		String nombreUsuario;
@@ -229,9 +227,10 @@ public class ControladorPrincipal {
 				carnet = new Carnet(paradaEncontrada);
 				paradaEncontrada.getPeregrinos().add(nuevoPeregrino.getId());
 				Optional<Long> idCarnetOptional = cc.insertarCarnet(carnet);
+				
 				if (idCarnetOptional.isPresent()) {
 					JOptionPane.showMessageDialog(null, "Carnet creado correctamente");
-
+					nuevoPeregrino.getCarnet().setId(idCarnetOptional.get());
 				} else {
 					JOptionPane.showMessageDialog(null, "Error al insertar el carnet");
 				}
@@ -240,7 +239,7 @@ public class ControladorPrincipal {
 				if (idPeregrinoOptional.isPresent()) {
 					JOptionPane.showMessageDialog(null, "Peregrino insertado correctamente");
 					nuevoPeregrino.setId(idPeregrinoOptional.get());
-					nuevoPeregrino.getCarnet().setId(idCarnetOptional.get());
+					return nuevoPeregrino;
 				} else {
 					JOptionPane.showMessageDialog(null, "Error al insertar correctamente");
 				}
@@ -249,7 +248,7 @@ public class ControladorPrincipal {
 			}
 
 		} while (pec.nombrePeregrinoExiste(nombre));
-		return nuevoPeregrino;
+		return null;
 	}
 
 	/**
@@ -284,10 +283,13 @@ public class ControladorPrincipal {
 				Parada paradaObj = paradaObjOptional.orElse(null);
 				Usuario u = new Usuario(nombreUsuario, contrasenia, "peregrino");
 				Optional<Long> idUsuario = uc.insertarUsuario(u);
-				Long idUsuarioValue = idUsuario.orElse(null);
+				Long idUsuarioValue = -1L;
+				if(idUsuario.isPresent()) {
+					idUsuarioValue = idUsuario.orElse(null);
+                  } 
+				
 				Peregrino nuevoPeregrino = new Peregrino(nombre, nacionalidad, new Carnet(paradaObj), idUsuarioValue);
-//				nuevoPeregrino.getParadas().add(paradaObj.getId());
-//				paradaObj.getPeregrinos().add(nuevoPeregrino.getId());
+
 				return nuevoPeregrino;
 			}
 		}
@@ -340,7 +342,10 @@ public class ControladorPrincipal {
 			Parada paradaObj = paradaObjOptional.orElse(null);
 			Usuario u = new Usuario(nuevoNombreUsuario, nuevaContrasenia, "peregrino");
 			Optional<Long> idUsuario = uc.insertarUsuario(u);
-			Long idUsuarioValue = idUsuario.orElse(null);
+			Long idUsuarioValue = -1L;
+			if(idUsuario.isPresent()) {
+				idUsuarioValue = idUsuario.orElse(null);
+              } 
 			Peregrino nuevoPeregrino = new Peregrino(nuevoNombre, nuevaNacionalidad, new Carnet(paradaObj),
 					idUsuarioValue);
 			nuevoPeregrino.getParadas().add(paradaObj.getId());
@@ -387,15 +392,14 @@ public class ControladorPrincipal {
 	 * @param responsable    Responsable de la parada.
 	 * @return true si el registro fue exitoso; false en caso contrario.
 	 */
-	public boolean registrarParada(String nombre, char region, String responsable) {
+	public boolean registrarParada(Parada parada) {
 		ParadasController pc = new ParadasController();
-		if (pc.paradaExiste(nombre)) {
+		if (pc.paradaExiste(parada.getNombre())) {
 			JOptionPane.showMessageDialog(null, "La parada ya existe");
 			return false;
 		}
-
-		Parada nuevaParada = new Parada(nombre, region, responsable);
-		Optional<Long> idParadaInsertada = pc.insertarParada(nuevaParada);
+		
+		Optional<Long> idParadaInsertada = pc.insertarParada(parada);
 		if (idParadaInsertada.isPresent()) {
 			JOptionPane.showMessageDialog(null, "Parada registrada con éxito");
 			return true;

@@ -311,9 +311,15 @@ public class Principal {
 				} else {
 					if (!sistema.validarCredenciales(responsable, contraseniaResponsable)) {
 
-						sistema.registrarParada(nombreParada, region, responsable);
-						Usuario u = new Usuario(responsable, contraseniaResponsable, "responsable");
-						sistema.insertarUsuario(u);
+						Usuario u = new Usuario(responsable, contraseniaResponsable, "parada");
+						Optional<Long> idUsuarioOptional = sistema.insertarUsuario(u);
+						if(idUsuarioOptional.isPresent()) {
+							Parada nuevaParada = new Parada(nombreParada, region, responsable);
+							nuevaParada.setIdUsuario(idUsuarioOptional.get());
+							sistema.registrarParada(nuevaParada);
+						}
+						
+
 					} else {
 						JOptionPane.showMessageDialog(null,
 								"Error al registrar la parada. El responsable ya está ocupado.");

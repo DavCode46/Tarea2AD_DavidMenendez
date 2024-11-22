@@ -24,27 +24,20 @@ public class ParadaDAO {
 
 	public Optional<Long> insertarParada(Parada parada) {
 		String sqlParadas = "INSERT INTO Paradas (nombre, region, responsable, id_usuario) VALUES (?, ?, ?, ?)";
-		String sqlUsuarios = "SELECT MAX(id) FROM Usuarios";
 
 		try (Connection connection = con.getConexion();
 				PreparedStatement paradaStmt = connection.prepareStatement(sqlParadas);
-				PreparedStatement usuarioStmt = connection.prepareStatement(sqlUsuarios);) {
+			) {
 
-			Long nextUsuarioId = 1L;
-			try (ResultSet rs = usuarioStmt.executeQuery()) {
-				if (rs.next()) {
-					nextUsuarioId = rs.getLong(1);
-				}
-			}
 
 			paradaStmt.setString(1, parada.getNombre());
 			paradaStmt.setString(2, String.valueOf(parada.getRegion()));
 			paradaStmt.setString(3, parada.getResponsable());
-			paradaStmt.setLong(4, nextUsuarioId);
+			paradaStmt.setLong(4, parada.getIdUsuario());
 
 			int rowsAffected = paradaStmt.executeUpdate();
 			System.out.println("Parada insertada, filas afectadas: " + rowsAffected);
-			return Optional.of(nextUsuarioId);
+			return Optional.of(parada.getIdUsuario());
 		} catch (SQLException e) {
 			logger.severe("Error al insertar parada: " + e.getMessage());
 		}

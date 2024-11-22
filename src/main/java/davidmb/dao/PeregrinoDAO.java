@@ -20,49 +20,42 @@ public class PeregrinoDAO {
 	public Optional<Long> insertarPeregrino(Peregrino peregrino) {
 		// Consultas SQL
 		String sqlPeregrino = "INSERT INTO Peregrinos (nombre, nacionalidad, id_carnet, id_usuario) VALUES (?, ?, ?, ?)";
-		String sqlCarnet = "SELECT MAX(id) FROM CARNETS";
-		String sqlUsuario = "SELECT MAX(id) FROM USUARIOS";
-
+		System.out.println(peregrino);
+//		String sqlCarnet = "SELECT MAX(id) FROM CARNETS";
+//		String sqlUsuario = "SELECT MAX(id) FROM USUARIOS";
+//		PreparedStatement carnetstmt = connection.prepareStatement(sqlCarnet);
+//		PreparedStatement usuariostmt = connection.prepareStatement(sqlUsuario);
+//		 Obtener el siguiente ID de carnet
+//					Long nextCarnetId = 1L;
+//					try (ResultSet rs = carnetstmt.executeQuery()) {
+//						if (rs.next()) {
+//							nextCarnetId = rs.getLong(1);
+//						}
+//					} catch (SQLException e) {
+//						e.printStackTrace();
+//
+//					}
+//
+//					 Obtener el siguiente ID de usuario
+//					Long nextUsuarioId = 1L;
+//					try (ResultSet rs = usuariostmt.executeQuery()) {
+//						if (rs.next()) {
+//							nextUsuarioId = rs.getLong(1);
+//						}
+//					}
 		try (Connection connection = con.getConexion();
-				PreparedStatement carnetstmt = connection.prepareStatement(sqlCarnet);
-				PreparedStatement usuariostmt = connection.prepareStatement(sqlUsuario);
-				PreparedStatement peregrinostmt = connection.prepareStatement(sqlPeregrino)) {
-
-			// Obtener el siguiente ID de carnet
-			Long nextCarnetId = 1L;
-			try (ResultSet rs = carnetstmt.executeQuery()) {
-				if (rs.next()) {
-					nextCarnetId = rs.getLong(1);
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-
-			}
-
-			// Obtener el siguiente ID de usuario
-			Long nextUsuarioId = 1L;
-			try (ResultSet rs = usuariostmt.executeQuery()) {
-				if (rs.next()) {
-					nextUsuarioId = rs.getLong(1);
-				}
-			}
+				
+				PreparedStatement peregrinostmt = connection.prepareStatement(sqlPeregrino)) {		
 
 			// Insertar el peregrino con los nuevos ID
 			peregrinostmt.setString(1, peregrino.getNombre());
 			peregrinostmt.setString(2, peregrino.getNacionalidad());
-			peregrinostmt.setLong(3, nextCarnetId);
-			peregrinostmt.setLong(4, nextUsuarioId);
+			peregrinostmt.setLong(3, peregrino.getCarnet().getId());
+			peregrinostmt.setLong(4, peregrino.getIdUsuario());
 
 			int rowsAffected = peregrinostmt.executeUpdate();
 			System.out.println("Peregrino insertado, filas afectadas: " + rowsAffected);
-			return Optional.of(nextUsuarioId);
-
-			// Al llamar al método debe manejar el Optional de la siguiente manera
-//	        if (result.isPresent()) {
-//	            System.out.println("Peregrino insertado con éxito. ID Usuario: " + result.get());
-//	        } else {
-//	            System.out.println("Error al insertar el peregrino.");
-//	        }
+			return Optional.of(peregrino.getIdUsuario());
 
 		} catch (SQLException e) {
 			e.printStackTrace();
