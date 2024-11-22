@@ -1,5 +1,6 @@
 package davidmb.services;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,8 +24,8 @@ public class ParadasService {
 		return paradaDAO.insertarParada(parada);
 	}
 	
-	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada) {
-		return paradaDAO.insertarPeregrinosParadas(idPeregrino, idParada);
+	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada, LocalDate fecha) {
+		return paradaDAO.insertarPeregrinosParadas(idPeregrino, idParada, fecha);
 	}
 	
 	public List<Parada> obtenerParadasPorIdPeregrino(Long idPeregrino) {

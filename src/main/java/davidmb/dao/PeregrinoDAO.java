@@ -150,91 +150,88 @@ public class PeregrinoDAO {
 	}
 
 	public Optional<Peregrino> obtenerPeregrinoPorIdUsuario(Long id) {
-	    String sqlPeregrino = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_carnet, p.id_usuario, "
-	            + "c.id AS carnet_id, c.parada_inicial, c.fechaexp, c.distancia, c.nvips, "
-	            + "pa.id AS parada_id, pa.nombre AS parada_nombre, pa.region, pa.responsable "
-	            + "FROM Peregrinos p "
-	            + "INNER JOIN Carnets c ON p.id_carnet = c.id "
-	            + "INNER JOIN Paradas pa ON c.parada_inicial = pa.id "
-	            + "WHERE p.id_usuario = ?";
+		String sqlPeregrino = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_carnet, p.id_usuario, "
+				+ "c.id AS carnet_id, c.parada_inicial, c.fechaexp, c.distancia, c.nvips, "
+				+ "pa.id AS parada_id, pa.nombre AS parada_nombre, pa.region, pa.responsable " + "FROM Peregrinos p "
+				+ "INNER JOIN Carnets c ON p.id_carnet = c.id " + "INNER JOIN Paradas pa ON c.parada_inicial = pa.id "
+				+ "WHERE p.id_usuario = ?";
 
-	    String sqlEstancias = "SELECT id FROM Estancias WHERE id_peregrino = ?";
+		String sqlEstancias = "SELECT id FROM Estancias WHERE id_peregrino = ?";
 
-	    String sqlParadas = "SELECT id_parada FROM Peregrinos_paradas WHERE id_peregrino = ?";
+		String sqlParadas = "SELECT id_parada FROM Peregrinos_paradas WHERE id_peregrino = ?";
 
-	    Peregrino peregrino = null;
-	    Carnet carnet = null;
-	    Parada parada = null;
-	    List<Long> estancias = new ArrayList<>();
-	    List<Long> paradas = new ArrayList<>();
-	    Long idPeregrino = null;
+		Peregrino peregrino = null;
+		Carnet carnet = null;
+		Parada parada = null;
+		List<Long> estancias = new ArrayList<>();
+		List<Long> paradas = new ArrayList<>();
+		Long idPeregrino = null;
 
-	    try (Connection connection = con.getConexion()) {
+		try (Connection connection = con.getConexion()) {
 
-	        // Obtener el peregrino, carnet y parada inicial
-	        try (PreparedStatement stmt = connection.prepareStatement(sqlPeregrino)) {
-	            stmt.setLong(1, id);
-	            try (ResultSet rs = stmt.executeQuery()) {
-	                if (rs.next()) {
-	                    peregrino = new Peregrino();
-	                    idPeregrino = rs.getLong("peregrino_id");
-	                    peregrino.setId(idPeregrino);
-	                    peregrino.setNombre(rs.getString("nombre"));
-	                    peregrino.setNacionalidad(rs.getString("nacionalidad"));
-	                    peregrino.setIdUsuario(rs.getLong("id_usuario"));
+			// Obtener el peregrino, carnet y parada inicial
+			try (PreparedStatement stmt = connection.prepareStatement(sqlPeregrino)) {
+				stmt.setLong(1, id);
+				try (ResultSet rs = stmt.executeQuery()) {
+					if (rs.next()) {
+						peregrino = new Peregrino();
+						idPeregrino = rs.getLong("peregrino_id");
+						peregrino.setId(idPeregrino);
+						peregrino.setNombre(rs.getString("nombre"));
+						peregrino.setNacionalidad(rs.getString("nacionalidad"));
+						peregrino.setIdUsuario(rs.getLong("id_usuario"));
 
-	                    carnet = new Carnet();
-	                    carnet.setId(rs.getLong("carnet_id"));
-	                    carnet.setFechaExp(rs.getDate("fechaexp").toLocalDate());
-	                    carnet.setDistancia(rs.getDouble("distancia"));
-	                    carnet.setnVips(rs.getInt("nvips"));
+						carnet = new Carnet();
+						carnet.setId(rs.getLong("carnet_id"));
+						carnet.setFechaExp(rs.getDate("fechaexp").toLocalDate());
+						carnet.setDistancia(rs.getDouble("distancia"));
+						carnet.setnVips(rs.getInt("nvips"));
 
-	                    parada = new Parada();
-	                    parada.setId(rs.getLong("parada_id"));
-	                    parada.setNombre(rs.getString("parada_nombre"));
-	                    parada.setResponsable(rs.getString("responsable"));
-	                    parada.setRegion(rs.getString("region").charAt(0));
+						parada = new Parada();
+						parada.setId(rs.getLong("parada_id"));
+						parada.setNombre(rs.getString("parada_nombre"));
+						parada.setResponsable(rs.getString("responsable"));
+						parada.setRegion(rs.getString("region").charAt(0));
 
-	                    carnet.setParadaInicial(parada);
-	                    peregrino.setCarnet(carnet);
-	                }
-	            }
-	        }
+						carnet.setParadaInicial(parada);
+						peregrino.setCarnet(carnet);
+					}
+				}
+			}
 
-	        if (idPeregrino != null) {
-	            // Obtener las estancias del peregrino
-	            try (PreparedStatement stmt = connection.prepareStatement(sqlEstancias)) {
-	                stmt.setLong(1, idPeregrino);
-	                try (ResultSet rs = stmt.executeQuery()) {
-	                    while (rs.next()) {
-	                        estancias.add(rs.getLong("id"));
-	                    }
-	                }
-	            }
+			if (idPeregrino != null) {
+				// Obtener las estancias del peregrino
+				try (PreparedStatement stmt = connection.prepareStatement(sqlEstancias)) {
+					stmt.setLong(1, idPeregrino);
+					try (ResultSet rs = stmt.executeQuery()) {
+						while (rs.next()) {
+							estancias.add(rs.getLong("id"));
+						}
+					}
+				}
 
-	            // Obtener las paradas del peregrino
-	            try (PreparedStatement stmt = connection.prepareStatement(sqlParadas)) {
-	                stmt.setLong(1, idPeregrino);
-	                try (ResultSet rs = stmt.executeQuery()) {
-	                    while (rs.next()) {
-	                        paradas.add(rs.getLong("id_parada"));
-	                    }
-	                }
-	            }
+				// Obtener las paradas del peregrino
+				try (PreparedStatement stmt = connection.prepareStatement(sqlParadas)) {
+					stmt.setLong(1, idPeregrino);
+					try (ResultSet rs = stmt.executeQuery()) {
+						while (rs.next()) {
+							paradas.add(rs.getLong("id_parada"));
+						}
+					}
+				}
 
-	            // Asignar las estancias y paradas al peregrino
-	            peregrino.setEstancias(estancias);
-	            peregrino.setParadas(paradas);
-	        }
+				// Asignar las estancias y paradas al peregrino
+				peregrino.setEstancias(estancias);
+				peregrino.setParadas(paradas);
+			}
 
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        
-	    }
+		} catch (SQLException e) {
+			e.printStackTrace();
 
-	    return Optional.ofNullable(peregrino);
+		}
+
+		return Optional.ofNullable(peregrino);
 	}
-
 
 	public List<Peregrino> obtenerTodosPeregrinos() {
 		String sqlPeregrino = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_carnet, p.id_usuario, "
@@ -313,6 +310,34 @@ public class PeregrinoDAO {
 		}
 
 		return peregrinos;
+	}
+
+	public boolean peregrinoExiste(Long id) {
+		String sql = "SELECT * FROM Peregrinos WHERE id = ?";
+		try (Connection connection = con.getConexion(); 
+			PreparedStatement stmt = connection.prepareStatement(sql)) {
+			stmt.setLong(1, id);
+			try (ResultSet rs = stmt.executeQuery()) {
+				return rs.next();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public boolean nombrePeregrinoExiste(String nombre) {
+		String sql = "SELECT * FROM Peregrinos WHERE nombre = ?";
+		try (Connection connection = con.getConexion(); 
+			PreparedStatement stmt = connection.prepareStatement(sql)) {
+			stmt.setString(1, nombre);
+			try (ResultSet rs = stmt.executeQuery()) {
+				return rs.next();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 //	public static void main(String[] args) {

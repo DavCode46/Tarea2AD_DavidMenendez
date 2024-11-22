@@ -1,6 +1,7 @@
 package davidmb.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import davidmb.dao.EstanciaDAO;
 import davidmb.models.Estancia;
@@ -17,7 +18,7 @@ public class EstanciasService {
 		this.estanciaDAO = estanciaDAO;
 	}
 	
-	public boolean insertarEstancia(Estancia estancia) {
+	public Optional<Long> insertarEstancia(Estancia estancia) {
 		return estanciaDAO.insertarEstancia(estancia);
 	}
 	

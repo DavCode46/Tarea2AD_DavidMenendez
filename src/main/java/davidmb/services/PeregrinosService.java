@@ -33,4 +33,12 @@ public class PeregrinosService {
 	public List<Peregrino> obtenerTodosPeregrinos() {
 		return peregrinoDAO.obtenerTodosPeregrinos();
 	}
+	
+	public boolean peregrinoExiste(Long id) {
+		return peregrinoDAO.peregrinoExiste(id);
+	}
+	
+	public boolean nombrePeregrinoExiste(String nombre) {
+		return peregrinoDAO.nombrePeregrinoExiste(nombre);
+	}
 }

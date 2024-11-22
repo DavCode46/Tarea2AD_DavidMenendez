@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 import davidmb.controllers.ControladorPrincipal;
 import davidmb.controllers.ExportarCarnetXML;
 import davidmb.controllers.ExportarEstanciasPeregrinosXML;
+import davidmb.models.Estancia;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
 import davidmb.models.Perfil;
@@ -64,7 +65,7 @@ public class Principal {
 		do {
 			String menu = "1. Login\n" + "2. Registrarse como peregrino\n" + "3. Salir\n";
 
-			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true);
+			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true, false);
 
 			if (opcion == null) {
 				JOptionPane.showMessageDialog(null, "Selecciona una opción.");
@@ -79,13 +80,13 @@ public class Principal {
 
 				MENU: do {
 
-					nombreUsuario = sistema.obtenerEntrada("Ingrese su nombre de usuario", "Nombre de usuario", false);
+					nombreUsuario = sistema.obtenerEntrada("Ingrese su nombre de usuario", "Nombre de usuario", false, true);
 
 					if (nombreUsuario == null) {
 						break;
 					}
 
-					contrasenia = sistema.obtenerEntrada("Ingrese su contraseña", "Contraseña", false);
+					contrasenia = sistema.obtenerEntrada("Ingrese su contraseña", "Contraseña", false, true);
 					if (contrasenia == null) {
 						break;
 					}
@@ -205,7 +206,7 @@ public class Principal {
 		do {
 			String menu = "1. Exportar carnet\n" + "2. Sellar carnet (No disponible)\n" + "0. Cerrar sesión\n";
 
-			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true);
+			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true, false);
 			if (opcion == null) {
 				JOptionPane.showMessageDialog(null, "Selecciona una opción");
 				continue;
@@ -265,7 +266,7 @@ public class Principal {
 				"Bienvenido " + nombreUsuario + "!\nPerfil: " + userActivo.getPerfil() + "\nID: " + userActivo.getId());
 		do {
 			String menu = "1. Registrar parada\n" + "0. Cerrar sesión\n";
-			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true);
+			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true, false);
 			if (opcion == null) {
 				JOptionPane.showMessageDialog(null, "Selecciona una opción.");
 				continue;
@@ -273,11 +274,11 @@ public class Principal {
 			switch (opcion) {
 			case "1": {
 				String nombreParada = sistema.obtenerEntrada("Ingrese el nombre de la parada", "Nombre de la parada",
-						false);
+						false, false);
 				if (nombreParada == null) {
 					return;
 				}
-				char region = sistema.obtenerEntrada("¿Cual es la region de la parada?", "Region de la parada", false)
+				char region = sistema.obtenerEntrada("¿Cual es la region de la parada?", "Region de la parada", false, false)
 						.charAt(0);
 				if (region == '0') {
 					return;
@@ -289,13 +290,13 @@ public class Principal {
 				}
 
 				String responsable = sistema.obtenerEntrada("¿Quien es el responsable de la parada?", "Responsable",
-						false);
+						false, true);
 
 				if (responsable == null) {
 					return;
 				}
 				String contraseniaResponsable = sistema.obtenerEntrada("Ingrese la contraseña del responsable",
-						"Contraseña del responsable", false);
+						"Contraseña del responsable", false, true);
 				if (contraseniaResponsable == null) {
 					return;
 				}
@@ -355,7 +356,7 @@ public class Principal {
 		String opcion = "";
 		MENU: do {
 			String menu = "1. Exportar estancias\n" + "2. Sellar carnet\n" + "0. Cerrar sesión\n";
-			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true);
+			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true, false);
 			if (opcion == null) {
 				JOptionPane.showMessageDialog(null, "Selecciona una opción.");
 				continue;
@@ -378,6 +379,65 @@ public class Principal {
 			}
 			case "2": {
 				// Sellar carnet
+				Peregrino peregrino = null;
+				Estancia nuevaEstancia = null;
+				boolean ret = false;
+				Long idPeregrinoLong = -1L;
+				do {
+					String idPeregrino = sistema.mostrarPeregrinos();
+					try {
+						idPeregrinoLong = Long.parseLong(idPeregrino);
+					}catch(NumberFormatException ex) {
+						JOptionPane.showMessageDialog(null, "El ID del peregrino es incorrecto", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}while(!sistema.peregrinoExiste(idPeregrinoLong));
+				Optional<Peregrino> peregrinoOptional = sistema.obtenerPeregrinoPorId(idPeregrinoLong);
+				
+				if(peregrinoOptional.isPresent()) {
+					peregrino = peregrinoOptional.get();
+				} else {
+					JOptionPane.showMessageDialog(null, "Error al obtener el peregrino", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+				Optional<Long> idPeregrinosParadas = sistema.insertarPeregrinosParadas(idPeregrinoLong, parada.getId(), LocalDate.now());
+				peregrino.getParadas().add(parada.getId());
+				parada.getPeregrinos().add(peregrino.getId());
+				if(idPeregrinosParadas.isPresent()) {
+					JOptionPane.showMessageDialog(null, "Parada registrada correctamente", "Parada registrada", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(null, "Error al registrar la parada", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+				peregrino.getCarnet().setDistancia(50);
+				
+				int registrarEstancia = JOptionPane.showConfirmDialog(null, "¿Deseas realizar una estancia?","Realizar estancia", JOptionPane.YES_NO_OPTION);
+				Optional<Long> isEstanciaOptional = null;
+				if(registrarEstancia == JOptionPane.YES_OPTION) {
+					int esVip = JOptionPane.showConfirmDialog(null, "¿La estancia será VIP?","Estancia VIP", JOptionPane.YES_NO_OPTION);
+					if(esVip == JOptionPane.YES_OPTION) {
+						peregrino.getCarnet().setnVips(peregrino.getCarnet().getnVips() + 1);
+						nuevaEstancia = new Estancia(LocalDate.now(), true, peregrino.getId(), parada.getId());
+						isEstanciaOptional = sistema.insertarEstancia(nuevaEstancia);
+						if(isEstanciaOptional.isPresent()) {
+							Long idEstancia = isEstanciaOptional.get();
+							peregrino.getEstancias().add(idEstancia);
+						}
+					} else {
+						nuevaEstancia = new Estancia(LocalDate.now(), false, peregrino.getId(), parada.getId());
+						isEstanciaOptional = sistema.insertarEstancia(nuevaEstancia);	
+					}
+					if(isEstanciaOptional.isPresent()) {
+						Long idEstancia = isEstanciaOptional.get();
+						peregrino.getEstancias().add(idEstancia);
+						JOptionPane.showMessageDialog(null, "Estancia realizada correctamente", "Estancias", JOptionPane.INFORMATION_MESSAGE);
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "Ha elegido no realizar estancia");
+				}
+				ret = sistema.modificarCarnet(peregrino.getCarnet());
+				if(ret) {
+					JOptionPane.showMessageDialog(null, "Carnet sellado correctamente", "Sellado correcto", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(null, "Error al sellar el carnet", "Error", JOptionPane.ERROR_MESSAGE);
+				}
 				break;
 			}
 			case "0": {
@@ -399,6 +459,8 @@ public class Principal {
 		 * a la distancia recorrida (sumando los kms. desde la parada anterior) y al nº
 		 * total de estancias VIP.
 		 */
+		
+		
 	}
 
 }

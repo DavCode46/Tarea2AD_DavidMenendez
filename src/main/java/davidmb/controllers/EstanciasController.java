@@ -1,6 +1,7 @@
 package davidmb.controllers;
 
 import java.util.List;
+import java.util.Optional;
 
 import davidmb.models.Estancia;
 import davidmb.services.EstanciasService;
@@ -18,7 +19,7 @@ public class EstanciasController {
 		this.estanciasService = estanciasService;
 	}
 	
-	public boolean insertarEstancia(Estancia estancia) {
+	public Optional<Long> insertarEstancia(Estancia estancia) {
 		return estanciasService.insertarEstancia(estancia);
 	}
 	

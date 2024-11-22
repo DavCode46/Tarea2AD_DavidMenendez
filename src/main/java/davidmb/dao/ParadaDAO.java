@@ -1,13 +1,17 @@
 package davidmb.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+
+import javax.swing.JOptionPane;
 
 import davidmb.models.Carnet;
 import davidmb.models.Parada;
@@ -121,15 +125,17 @@ public class ParadaDAO {
 		return paradas;
 	}
 	
-	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada) {
-		String sql = "INSERT INTO Peregrinos_paradas (id_peregrino, id_parada) VALUES (?, ?)";
+	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada, LocalDate fecha) {
+		String sql = "INSERT INTO Peregrinos_paradas (id_peregrino, id_parada, fecha) VALUES (?, ?, ?)";
 		try (Connection connection = con.getConexion(); 
 			PreparedStatement stmt = connection.prepareStatement(sql);
 			) {
 			stmt.setLong(1, idPeregrino);
 			stmt.setLong(2, idParada);
+			stmt.setDate(3, Date.valueOf(fecha));
 			int rowsAffected = stmt.executeUpdate();
 			if (rowsAffected > 0) {
+				JOptionPane.showMessageDialog(null, stmt);
 				return Optional.of(idPeregrino);
 			}
 		} catch (SQLException e) {

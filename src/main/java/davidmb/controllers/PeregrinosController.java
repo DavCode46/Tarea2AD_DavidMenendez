@@ -34,4 +34,12 @@ public class PeregrinosController {
 	public List<Peregrino> obtenerTodosPeregrinos() {
 		return peregrinosService.obtenerTodosPeregrinos();
 	}
+	
+	public boolean peregrinoExiste(Long id) {
+		return peregrinosService.peregrinoExiste(id);
+	}
+	
+	public boolean nombrePeregrinoExiste(String nombre) {
+		return peregrinosService.nombrePeregrinoExiste(nombre);
+	}
 }

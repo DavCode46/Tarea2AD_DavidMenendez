@@ -5,8 +5,10 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import davidmb.models.Estancia;
@@ -15,13 +17,13 @@ public class EstanciaDAO {
 	ConexionDB con = ConexionDB.getInstancia();
 	Logger logger = Logger.getLogger(EstanciaDAO.class.getName());
 
-	public boolean insertarEstancia(Estancia estancia) {
+	public Optional<Long> insertarEstancia(Estancia estancia) {
 		String sqlEstancias = "INSERT INTO Estancias (id_peregrino, id_parada, fecha, vip) VALUES (?, ?, ?, ?)";
 
-		boolean result = false;
+		
 		
 		try (Connection connection = con.getConexion();
-			PreparedStatement estanciaStmt = connection.prepareStatement(sqlEstancias);
+			PreparedStatement estanciaStmt = connection.prepareStatement(sqlEstancias,  Statement.RETURN_GENERATED_KEYS);
 			) {
 			
 			estanciaStmt.setLong(1, estancia.getPeregrino());
@@ -32,12 +34,17 @@ public class EstanciaDAO {
 			
 			int rowsAffected = estanciaStmt.executeUpdate();
 			if (rowsAffected > 0) {
-				result = true;
+				try (ResultSet rs = estanciaStmt.getGeneratedKeys()) {
+					if (rs.next()) {
+						estancia.setId(rs.getLong(1));
+					}
+				}
+				return Optional.of(estancia.getId());
 			}
 		} catch (SQLException e) {
 			logger.severe("Error al insertar parada: " + e.getMessage());
 		}
-		return result;
+		return Optional.empty();
 	}
 
 	

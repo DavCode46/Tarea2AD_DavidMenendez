@@ -1,5 +1,6 @@
 package davidmb.controllers;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,8 +25,8 @@ public class ParadasController {
 		return paradasService.insertarParada(parada);
 	}
 	
-	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada) {
-		return paradasService.insertarPeregrinosParadas(idPeregrino, idParada);
+	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada, LocalDate fecha) {
+		return paradasService.insertarPeregrinosParadas(idPeregrino, idParada, fecha);
 	}
 	
 	public List<Parada> obtenerParadasPorIdPeregrino(Long idPeregrino) {
