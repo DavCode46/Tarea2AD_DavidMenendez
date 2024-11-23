@@ -1,16 +1,17 @@
 package davidmb.controllers;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -18,6 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,12 +30,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import davidmb.main.Sesion;
 import davidmb.models.Carnet;
 import davidmb.models.Estancia;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
-import davidmb.models.Perfil;
 import davidmb.models.Usuario;
 
 /**
@@ -533,6 +533,98 @@ public class ControladorPrincipal {
 			return null; // cancelado
 		}
 	}
+	
+	
+	// Mostrar estancias de peregrinos
+	
+
+
+	public void mostrarEstanciasPeregrinos(LocalDate fechaInicio, LocalDate fechaFin, Parada parada) {
+		ExportarEstanciasPeregrinosXML exportarEstancias = new ExportarEstanciasPeregrinosXML(fechaInicio, fechaFin, parada);
+	    PeregrinosController pec = new PeregrinosController();
+	    List<Estancia> estanciasParada = obtenerEstanciasPorIdParada(parada.getId());
+	    String[] columnas = { "ID", "Peregrino", "Fecha", "VIP" };
+
+	    DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0) {
+	        private static final long serialVersionUID = 1L;
+
+	        @Override
+	        public boolean isCellEditable(int row, int column) {
+	            return false; // Evita que el usuario pueda editar las celdas de la tabla
+	        }
+
+	        @Override
+	        public Class<?> getColumnClass(int columnIndex) {
+	            if (columnIndex == 3) { // Columna "VIP"
+	                return ImageIcon.class; // Indicar que esta columna contendrá una imagen
+	            }
+	            return super.getColumnClass(columnIndex);
+	        }
+	    };
+
+	    // Rellenar el modelo con datos de las estancias
+	    for (Estancia e : estanciasParada) {
+	        Optional<Peregrino> peregrinoOptional = pec.obtenerPeregrinoPorId(e.getPeregrino());
+	        if (peregrinoOptional.isPresent()) {
+	            Peregrino p = peregrinoOptional.get();
+	            
+	            // Crear el archivo de imagen para la columna "VIP"
+	            ImageIcon vipImage = new ImageIcon(e.isVip() ? "src/main/resources/check.png" : null);
+	            
+	            // Añadir la fila con la imagen en la columna "VIP"
+	            
+				if (e.getFecha().isAfter(fechaInicio) && e.getFecha().isBefore(fechaFin)) {
+					modeloTabla.addRow(new Object[] { e.getId(), p.getNombre(), e.getFecha(), vipImage });
+				}
+	        }
+	    }
+
+	    // Tabla
+	    JTable tablaPeregrinos = new JTable(modeloTabla) {
+	        private static final long serialVersionUID = 1L;
+
+	        @Override
+	        public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+	            Component c = super.prepareRenderer(renderer, row, column);
+	            
+	            if (column == 3) { // Si es la columna "VIP"
+	                // Redimensionar la imagen para que se ajuste al tamaño de la celda
+	                JLabel label = (JLabel) c;
+	                ImageIcon icon = (ImageIcon) label.getIcon();
+	                Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH); // Redimensionar la imagen
+	                label.setIcon(new ImageIcon(img));
+	            }
+	            return c;
+	        }
+	    };
+
+	    tablaPeregrinos.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+	    // Panel Tabla
+	    JPanel panel = new JPanel(new BorderLayout(5, 5));
+	    panel.add(new JScrollPane(tablaPeregrinos), BorderLayout.CENTER);
+
+	    // InputField para la inserción del ID
+	    JPanel inputPanel = new JPanel(new BorderLayout(5, 5));
+	    inputPanel.add(new JLabel("¿Deseas exportar las estancias?"), BorderLayout.WEST);
+	    panel.add(inputPanel, BorderLayout.SOUTH);
+
+	    // Añadir el panel principal a un JOptionPane.showConfirmDialog
+	    int option = JOptionPane.showConfirmDialog(null, panel, "Peregrinos disponibles:", JOptionPane.OK_CANCEL_OPTION,
+	            JOptionPane.INFORMATION_MESSAGE);
+
+	    if (option == JOptionPane.OK_OPTION) {
+	    	try {
+				exportarEstancias.exportarEstancias();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			return; // cancelado
+		}
+	}
+
 
 	/**
 	 * Valida un String según los criterios establecidos (no vacío, sin espacios

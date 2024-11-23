@@ -6,3 +6,5 @@ INFORMACIÓN: Fin del programa.
 [INFO] [davidmb.utils.MyLogger.main()]: Fin del programa.
 [INFO] [davidmb.utils.MyLogger.init()]: Logger inicializado.
 [INFO] [davidmb.dao.CarnetDAO.insertarCarnet()]: Carnet insertado con ID: 16
+[INFO] [davidmb.utils.MyLogger.init()]: Logger inicializado.
+[INFO] [davidmb.utils.MyLogger.init()]: Logger inicializado.

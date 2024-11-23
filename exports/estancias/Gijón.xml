@@ -3,19 +3,13 @@
     <id>1</id>
     <parada>Gijón</parada>
     <region>N</region>
-    <fecha-inicio>2024-11-22</fecha-inicio>
-    <fecha-fin>2024-11-23</fecha-fin>
+    <fecha-inicio>2024-01-01</fecha-inicio>
+    <fecha-fin>2025-01-01</fecha-fin>
     <estancias>
         <estancia>
-            <id>8</id>
+            <id>1</id>
             <peregrino>Juan Pérez</peregrino>
-            <fecha>2024-11-22</fecha>
-            <vip>Sí</vip>
-        </estancia>
-        <estancia>
-            <id>10</id>
-            <peregrino>diego</peregrino>
-            <fecha>2024-11-22</fecha>
+            <fecha>2024-01-02</fecha>
             <vip>Sí</vip>
         </estancia>
     </estancias>

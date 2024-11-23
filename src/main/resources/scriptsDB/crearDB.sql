@@ -69,11 +69,11 @@ CREATE TABLE Peregrinos_Paradas (
 -- Insertar datos en la tabla Usuarios
 INSERT INTO Usuarios (usuario, password, perfil) VALUES
 ('admin', 'admin', 'administrador'),
-('responsable1', 'respass1', 'responsable'),
-('responsable2', 'respass2', 'responsable'),
-('responsable3', 'respass3', 'responsable'),
-('responsable4', 'respass4', 'responsable'),
-('responsable5', 'respass5', 'responsable'),
+('responsable1', 'respass1', 'parada'),
+('responsable2', 'respass2', 'parada'),
+('responsable3', 'respass3', 'parada'),
+('responsable4', 'respass4', 'parada'),
+('responsable5', 'respass5', 'parada'),
 ('peregrino1', 'perepass1', 'peregrino'),
 ('peregrino2', 'perepass2', 'peregrino'),
 ('peregrino3', 'perepass3', 'peregrino'),

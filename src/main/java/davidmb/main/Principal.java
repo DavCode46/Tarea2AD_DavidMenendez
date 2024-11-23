@@ -375,17 +375,8 @@ public class Principal {
 				do {
 					fechaInicio = sistema.obtenerEntradaFecha("Introduce la fecha de inicio", "Fecha de Inicio");
 					fechaFin = sistema.obtenerEntradaFecha("Introduce la fecha de Fin", "Fecha de Fin");
-				}while(!sistema.validarFechas(fechaInicio, fechaFin));
-
-				ExportarEstanciasPeregrinosXML exportarEstancias = new ExportarEstanciasPeregrinosXML(fechaInicio,
-						fechaFin, parada);
-
-				try {
-					exportarEstancias.exportarEstancias();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				} while (!sistema.validarFechas(fechaInicio, fechaFin));
+				sistema.mostrarEstanciasPeregrinos(fechaInicio, fechaFin, parada);				
 				break;
 			}
 			case "2": {
