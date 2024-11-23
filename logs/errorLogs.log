@@ -1,0 +1,8 @@
+nov 23, 2024 4:49:13 P. M. davidmb.utils.MyLogger main
+GRAVE: Error en el programa
+java.lang.ArithmeticException: / by zero
+	at davidmb.utils.MyLogger.main(MyLogger.java:56)
+
+[SEVERE] [davidmb.utils.MyLogger.main()]: Error en el programa
+java.lang.ArithmeticException: / by zero
+	at davidmb.utils.MyLogger.main(MyLogger.java:77)

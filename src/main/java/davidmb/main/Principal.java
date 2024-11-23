@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
@@ -16,6 +17,7 @@ import davidmb.models.Parada;
 import davidmb.models.Peregrino;
 import davidmb.models.Perfil;
 import davidmb.models.Usuario;
+import davidmb.utils.MyLogger;
 
 /**
  * Clase principal del sistema de gestión de peregrinos y paradas. Proporciona
@@ -33,7 +35,7 @@ public class Principal {
 	 * @param args Argumentos de la línea de comandos (no se utilizan).
 	 */
 	public static void main(String[] args) {
-
+		MyLogger.init();
 		mostrarMenu();
 
 	}
