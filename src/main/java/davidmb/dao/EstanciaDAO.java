@@ -106,16 +106,4 @@ public class EstanciaDAO {
 		
 		return estancias;
 	}
-//	
-//	public static void main(String args[]) {
-//		EstanciaDAO dao = new EstanciaDAO();
-//		Estancia estancia = new Estancia(java.time.LocalDate.now(), false, 1L, 2L);
-//		
-//		boolean ret = dao.insertarEstancia(estancia);
-//		System.out.println(ret);
-//		List<Estancia> estanciasPeregrino = dao.obtenerEstanciaPorIdPeregrino(1L);
-//		for(Estancia e : estanciasPeregrino) {
-//			System.out.println(e);
-//		}
-//	}
 }

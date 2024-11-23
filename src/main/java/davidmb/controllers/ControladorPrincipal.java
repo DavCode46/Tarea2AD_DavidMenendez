@@ -50,16 +50,11 @@ public class ControladorPrincipal {
 
 	private ControladorPrincipal controladorPrincipal;
 
-	private Map<String, Sesion> credenciales = new HashMap<>();
+	//private Map<String, Sesion> credenciales = new HashMap<>();
 
-	private Map<String, Parada> paradas = new HashMap<>();
 
 	/**
-	 * Constructor que inicializa el sistema con los archivos de credenciales y
-	 * paradas.
-	 * 
-	 * @param archivoCredenciales Ruta del archivo de credenciales.
-	 * @param archivoParadas      Ruta del archivo de paradas.
+	 * Constructor por defecto.
 	 */
 	public ControladorPrincipal() {
 		super();
@@ -70,18 +65,7 @@ public class ControladorPrincipal {
 		this.controladorPrincipal = controladorPrincipal;
 	}
 
-	/**
-	 * Obtiene el perfil asociado a un nombre de usuario.
-	 * 
-	 * @param nombreUsuario Nombre de usuario.
-	 * @return Perfil del usuario o null si no existe.
-	 */
-	public Perfil obtenerPerfil(String nombreUsuario) {
-		Sesion s = credenciales.get(nombreUsuario);
 
-		System.out.print(s.getPerfil());
-		return (s != null) ? s.getPerfil() : null;
-	}
 
 	/**
 	 * Obtiene el ID asociado a un nombre de usuario.
@@ -89,16 +73,11 @@ public class ControladorPrincipal {
 	 * @param nombreUsuario Nombre de usuario.
 	 * @return ID del usuario o null si no existe.
 	 */
-	public Long getId(String nombreUsuario) {
-		Sesion u = credenciales.get(nombreUsuario);
-
-		return (u != null) ? u.getId() : null;
-	}
-
-	public boolean usuarioExiste(String usuario) {
-		UsuariosController uc = new UsuariosController();
-		return uc.usuarioExiste(usuario);
-	}
+//	public Long getId(String nombreUsuario) {
+//		Sesion u = credenciales.get(nombreUsuario);
+//
+//		return (u != null) ? u.getId() : null;
+//	}
 
 	public boolean validarCredenciales(String nombre, String contrasenia) {
 		UsuariosController uc = new UsuariosController();
@@ -160,12 +139,7 @@ public class ControladorPrincipal {
 		return e.insertarEstancia(estancia);
 	}
 
-	/**
-	 * 
-	 * @param archivoParadas
-	 * @param archivoCredenciales
-	 * @return
-	 */
+
 	public Peregrino registrarPeregrino() {
 		ParadasController pc = new ParadasController();
 		PeregrinosController pec = new PeregrinosController();
@@ -259,7 +233,6 @@ public class ControladorPrincipal {
 	 * @param contrasenia
 	 * @param nacionalidad
 	 * @param parada
-	 * @param archivoCredenciales
 	 * @return Peregrino con los datos introducidos por el usuario
 	 */
 	private Peregrino confirmarDatos(String nombre, String nombreUsuario, String contrasenia, String nacionalidad,
@@ -301,7 +274,6 @@ public class ControladorPrincipal {
 	 * solo se muestra si el usuario indica que los datos mostrados en
 	 * confirmarDatos no son correctos
 	 * 
-	 * @param archivoCredenciales
 	 * @param nombre
 	 * @param contrasenia
 	 * @param nacionalidad
@@ -357,7 +329,6 @@ public class ControladorPrincipal {
 	/**
 	 * Muestra las paradas registradas en el sistema.
 	 * 
-	 * @param archivoParadas Archivo de paradas.
 	 * @param isPeregrino    Si es true, muestra solo el nombre y región.
 	 * @return Lista de paradas formateada como cadena.
 	 */
@@ -386,10 +357,6 @@ public class ControladorPrincipal {
 	/**
 	 * Registra una nueva parada en el sistema.
 	 * 
-	 * @param archivoParadas Archivo de paradas.
-	 * @param nombre         Nombre de la parada.
-	 * @param region         Región de la parada.
-	 * @param responsable    Responsable de la parada.
 	 * @return true si el registro fue exitoso; false en caso contrario.
 	 */
 	public boolean registrarParada(Parada parada) {
@@ -423,16 +390,6 @@ public class ControladorPrincipal {
 		return pc.insertarPeregrinosParadas(idPeregrino, idParada, fecha);
 	}
 
-	/**
-	 * Verifica si una parada existe en el sistema.
-	 * 
-	 * @param nombre Nombre de la parada.
-	 * @return true si la parada existe; false en caso contrario.
-	 */
-//	public boolean paradaExiste(String nombre) {
-//		ParadasController pc = new ParadasController();
-//		return pc.paradaExiste(nombre);
-//	}
 
 	/**
 	 * Muestra la lista de países disponibles cargada desde el archivo XML.

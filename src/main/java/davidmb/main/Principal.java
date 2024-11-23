@@ -21,7 +21,7 @@ import davidmb.models.Usuario;
  * Clase principal del sistema de gestión de peregrinos y paradas. Proporciona
  * el menú principal y las opciones para iniciar sesión, registrarse como
  * peregrino, y gestionar funcionalidades de usuario según el perfil. Se integra
- * con la clase {@link Sistema} para la gestión de usuarios y paradas.
+ * con la clase {@link ControladorPrincipal} para la gestión de usuarios y paradas.
  */
 public class Principal {
 

@@ -45,7 +45,7 @@ public class ParadasController {
 		return paradasService.obtenerParadaPorNombre(nombre);
 	}
 	
-	
+	// No utilizado
 	public List<Peregrino> obtenerPeregrinosParada(Long idParada) {
 		return paradasService.obtenerPeregrinosParada(idParada);
 	}

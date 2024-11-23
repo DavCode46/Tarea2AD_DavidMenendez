@@ -26,7 +26,4 @@ public class CarnetsController {
 		return carnetService.modificarCarnet(carnet);
 	}
 	
-	public Optional<Carnet> obtenerCarnetPorId(Long id) {
-		return carnetService.obtenerCarnetPorId(id);
-	}
 }

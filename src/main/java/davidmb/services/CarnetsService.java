@@ -25,7 +25,4 @@ public class CarnetsService {
 		return carnetDAO.modificarCarnet(carnet);
 	}
 	
-	public Optional<Carnet> obtenerCarnetPorId(Long id) {
-		return carnetDAO.obtenerCarnetPorId(id);
-	}
 }

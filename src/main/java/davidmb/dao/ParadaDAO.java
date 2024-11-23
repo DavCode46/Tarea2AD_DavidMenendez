@@ -327,18 +327,4 @@ public class ParadaDAO {
 		return existe;
 	}	
 
-
-//	public static void main(String args[]) {
-//		ParadaDAO dao = new ParadaDAO();
-//
-//		List<Peregrino> peregrinos = dao.obtenerPeregrinosParada(1L);
-//		for (Peregrino p : peregrinos) {
-//			System.out.println(p);
-//		}
-//		List<Parada> paradas = dao.obtenerTodasParadas();
-//		for (Parada p : paradas) {
-//			System.out.println(p);
-//		}
-//	}
-
 }

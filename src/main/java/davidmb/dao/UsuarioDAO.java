@@ -111,18 +111,4 @@ public class UsuarioDAO {
 		return existe;
 	}
 
-	public static void main(String args[]) {
-		UsuarioDAO uDAO = new UsuarioDAO();
-		System.out.println(uDAO.usuarioExiste("admin"));
-//		Usuario u = new Usuario("David", "david", "peregrino");
-//		
-//		uDAO.insertar(u);
-//		Usuario u = uDAO.login("responsable1", "respass1");
-//		if (u != null) {
-//			System.out.println("Usuario encontrado: " + u);
-//		} else {
-//			System.out.println("Usuario no encontrado");
-//		}
-	}
-
 }

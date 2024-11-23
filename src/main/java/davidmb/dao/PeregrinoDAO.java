@@ -21,28 +21,7 @@ public class PeregrinoDAO {
 		// Consultas SQL
 		String sqlPeregrino = "INSERT INTO Peregrinos (nombre, nacionalidad, id_carnet, id_usuario) VALUES (?, ?, ?, ?)";
 		System.out.println(peregrino);
-//		String sqlCarnet = "SELECT MAX(id) FROM CARNETS";
-//		String sqlUsuario = "SELECT MAX(id) FROM USUARIOS";
-//		PreparedStatement carnetstmt = connection.prepareStatement(sqlCarnet);
-//		PreparedStatement usuariostmt = connection.prepareStatement(sqlUsuario);
-//		 Obtener el siguiente ID de carnet
-//					Long nextCarnetId = 1L;
-//					try (ResultSet rs = carnetstmt.executeQuery()) {
-//						if (rs.next()) {
-//							nextCarnetId = rs.getLong(1);
-//						}
-//					} catch (SQLException e) {
-//						e.printStackTrace();
-//
-//					}
-//
-//					 Obtener el siguiente ID de usuario
-//					Long nextUsuarioId = 1L;
-//					try (ResultSet rs = usuariostmt.executeQuery()) {
-//						if (rs.next()) {
-//							nextUsuarioId = rs.getLong(1);
-//						}
-//					}
+
 		try (Connection connection = con.getConexion();
 				
 				PreparedStatement peregrinostmt = connection.prepareStatement(sqlPeregrino)) {		
@@ -332,39 +311,5 @@ public class PeregrinoDAO {
 		}
 		return false;
 	}
-
-//	public static void main(String[] args) {
-//		PeregrinoDAO peregrino = new PeregrinoDAO();
-//		
-//		Peregrino p = peregrino.obtenerPeregrinoPorIdUsuario(7L);
-//		
-//		System.out.println(p);
-//		UsuarioDAO usuarioDAO = new UsuarioDAO();
-//		CarnetDAO carnetDAO = new CarnetDAO();
-//
-//		Carnet carnet = new Carnet();
-//		carnet.setParadaInicial(new Parada(1L, "Parada Inicial", 'N', "Responsable"));
-//		carnetDAO.insertarCarnet(carnet);
-//
-//		Usuario usuario = new Usuario("david", "david", "peregrino");
-//		usuarioDAO.insertar(usuario);
-//
-//		Peregrino p = new Peregrino("David", "Español", carnet, 0L);
-//
-//		Optional<Long> resultado = peregrino.insertarPeregrino(p);
-//
-//		if (resultado.isPresent()) {
-//			System.out.println("El peregrino fue insertado correctamente." + resultado.get());
-//		} else {
-//			System.out.println("Hubo un error al insertar el peregrino.");
-//		}
-//		 Peregrino p = peregrino.obtenerPeregrinoPorId(1L);
-//		List<Peregrino> listaPeregrinos = peregrino.obtenerTodosPeregrinos();
-//		for(Peregrino p : listaPeregrinos) {
-//			System.out.println(p);
-//		}
-//		 System.out.println(p);
-//
-//	}
 
 }
