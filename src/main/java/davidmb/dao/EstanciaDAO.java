@@ -39,6 +39,7 @@ public class EstanciaDAO {
 						estancia.setId(rs.getLong(1));
 					}
 				}
+				logger.info("Estancia insertada correctamente" + estancia);
 				return Optional.of(estancia.getId());
 			}
 		} catch (SQLException e) {
@@ -70,6 +71,7 @@ public class EstanciaDAO {
 					estancias.add(estancia);
 				}
 			}
+			logger.info("Estancias obtenidas correctamente");
 			
 		}catch(SQLException ex) {
 			logger.severe("Error al obtener la estancia del peregrino");
@@ -99,6 +101,7 @@ public class EstanciaDAO {
 					estancias.add(estancia);
 				}
 			}
+			logger.info("Estancias obtenidas correctamente");
 			
 		}catch(SQLException ex) {
 			logger.severe("Error al obtener la estancia del peregrino");

@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import davidmb.models.Carnet;
 import davidmb.models.Parada;
@@ -16,6 +17,7 @@ import davidmb.models.Usuario;
 public class PeregrinoDAO {
 
 	ConexionDB con = ConexionDB.getInstancia();
+	private static final Logger logger = Logger.getLogger(PeregrinoDAO.class.getName());
 
 	public Optional<Long> insertarPeregrino(Peregrino peregrino) {
 		// Consultas SQL
@@ -32,12 +34,12 @@ public class PeregrinoDAO {
 			peregrinostmt.setLong(3, peregrino.getCarnet().getId());
 			peregrinostmt.setLong(4, peregrino.getIdUsuario());
 
-			int rowsAffected = peregrinostmt.executeUpdate();
-			System.out.println("Peregrino insertado, filas afectadas: " + rowsAffected);
+			peregrinostmt.executeUpdate();
+			logger.info("Peregrino insertado: " + peregrino);
 			return Optional.of(peregrino.getIdUsuario());
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.severe("Error al insertar peregrino: " + e.getMessage());
 		}
 		return Optional.empty();
 	}
@@ -113,9 +115,10 @@ public class PeregrinoDAO {
 			// Asignar las estancias y paradas al peregrino
 			peregrino.setEstancias(estancias);
 			peregrino.setParadas(paradas);
+			logger.info("Peregrino obtenido: " + peregrino);
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.severe("Error al obtener peregrino: " + e.getMessage());
 		}
 
 		return Optional.ofNullable(peregrino);
@@ -195,10 +198,12 @@ public class PeregrinoDAO {
 				// Asignar las estancias y paradas al peregrino
 				peregrino.setEstancias(estancias);
 				peregrino.setParadas(paradas);
+				logger.info("Peregrino obtenido con éxito");
 			}
+			
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.severe("Error al obtener peregrino: " + e.getMessage());
 
 		}
 
@@ -276,9 +281,11 @@ public class PeregrinoDAO {
 
 				// Agregar el peregrino a la lista
 				peregrinos.add(peregrino);
+				
 			}
+			logger.info("Peregrinos obtenidos");
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.severe("Error al obtener peregrinos: " + e.getMessage());
 		}
 
 		return peregrinos;
@@ -290,10 +297,12 @@ public class PeregrinoDAO {
 			PreparedStatement stmt = connection.prepareStatement(sql)) {
 			stmt.setLong(1, id);
 			try (ResultSet rs = stmt.executeQuery()) {
+				logger.info("Peregrino existe");
 				return rs.next();
 			}
+			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.severe("Error al comprobar si el peregrino existe: " + e.getMessage());
 		}
 		return false;
 	}
@@ -304,10 +313,11 @@ public class PeregrinoDAO {
 			PreparedStatement stmt = connection.prepareStatement(sql)) {
 			stmt.setString(1, nombre);
 			try (ResultSet rs = stmt.executeQuery()) {
+				logger.info("Nombre de peregrino existe");
 				return rs.next();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.severe("Error al comprobar si el nombre de peregrino existe: " + e.getMessage());
 		}
 		return false;
 	}

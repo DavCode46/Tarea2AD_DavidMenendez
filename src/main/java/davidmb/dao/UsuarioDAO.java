@@ -34,7 +34,7 @@ public class UsuarioDAO {
 					}
 				}
 			}
-			System.out.println("Usuario insertado con ID: " + idUsuario);
+			logger.info("Usuario insertado: " + u);
 		} catch (SQLException ex) {
 			logger.severe("Error al insertar usuario: " + ex.getMessage());
 		}
@@ -62,6 +62,7 @@ public class UsuarioDAO {
 					u.setPerfil(rs.getString("perfil"));
 				}
 			}
+			logger.info("Usuario encontrado: " + u);
 		} catch (SQLException ex) {
 			logger.severe("Error al buscar usuario: " + ex.getMessage());
 		}
@@ -85,6 +86,7 @@ public class UsuarioDAO {
 					ret = true;
 				}
 			}
+			logger.info("Usuario encontrado: " + ret);
 
 		} catch (SQLException ex) {
 			logger.severe("Error al buscar usuario: " + ex.getMessage());
@@ -105,6 +107,7 @@ public class UsuarioDAO {
 	                existe = true; 
 	            }
 	        }
+	        logger.info("Usuario encontrado: " + existe);
 			} catch (SQLException ex) {
 				logger.severe("Error al buscar usuario: " + ex.getMessage());
 			}

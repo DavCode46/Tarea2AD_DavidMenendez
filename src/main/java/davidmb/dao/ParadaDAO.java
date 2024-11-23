@@ -11,11 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import javax.swing.JOptionPane;
-
 import davidmb.models.Carnet;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
+import davidmb.utils.MyLogger;
 
 public class ParadaDAO {
 
@@ -35,8 +34,8 @@ public class ParadaDAO {
 			paradaStmt.setString(3, parada.getResponsable());
 			paradaStmt.setLong(4, parada.getIdUsuario());
 
-			int rowsAffected = paradaStmt.executeUpdate();
-			System.out.println("Parada insertada, filas afectadas: " + rowsAffected);
+			paradaStmt.executeUpdate();
+			logger.info("Parada insertada correctamente");
 			return Optional.of(parada.getIdUsuario());
 		} catch (SQLException e) {
 			logger.severe("Error al insertar parada: " + e.getMessage());
@@ -60,6 +59,7 @@ public class ParadaDAO {
 					parada.setResponsable(rs.getString("responsable"));
 				}
 			}
+			logger.info("Parada recuperada correctamente");
 		}catch(SQLException ex) {
 			logger.severe("Error al recuperar la parada: " + ex.getMessage());
 		}
@@ -70,7 +70,6 @@ public class ParadaDAO {
 		String paradaSql = "SELECT * FROM Paradas WHERE id_usuario = ?";
 
 		Parada parada = null;
-		Long paradaId = null;
 
 		try (Connection connection = con.getConexion();
 				PreparedStatement paradaStmt = connection.prepareStatement(paradaSql);) {
@@ -84,6 +83,7 @@ public class ParadaDAO {
 					parada.setResponsable(rs.getString("responsable"));
 				}
 			}
+			logger.info("Parada recuperada correctamente");
 
 		} catch (SQLException e) {
 			logger.severe("Error al obtener parada por id de usuario: " + e.getMessage());
@@ -112,6 +112,7 @@ public class ParadaDAO {
 					paradas.add(parada);
 				}
 			}
+			logger.info("Paradas obtenidas correctamente");
 		} catch (SQLException e) {
 			logger.severe("Error al obtener paradas por id de peregrino: " + e.getMessage());
 		}
@@ -128,7 +129,7 @@ public class ParadaDAO {
 			stmt.setDate(3, Date.valueOf(fecha));
 			int rowsAffected = stmt.executeUpdate();
 			if (rowsAffected > 0) {
-				JOptionPane.showMessageDialog(null, stmt);
+				logger.info("Peregrino_parada insertado correctamente");
 				return Optional.of(idPeregrino);
 			}
 		} catch (SQLException e) {
@@ -155,6 +156,7 @@ public class ParadaDAO {
 					
 				}
 			}
+			logger.info("Parada recuperada correctamente");
 
 		} catch (SQLException e) {
 			logger.severe("Error al obtener parada por id de usuario: " + e.getMessage());
@@ -258,6 +260,7 @@ public class ParadaDAO {
 	                peregrinos.add(peregrino);
 	            }
 	        }
+	        logger.info("Peregrinos obtenidos correctamente");
 	    } catch (SQLException e) {
 	        logger.severe("Error al obtener peregrinos de la parada: " + e.getMessage());
 	    }
@@ -303,6 +306,7 @@ public class ParadaDAO {
          
 	            paradas.add(parada);
 	        }
+	        logger.info("Paradas obtenidas correctamente");
 
 	    } catch (SQLException e) {
 	        logger.severe("Error al obtener todas las paradas: " + e.getMessage());
@@ -319,8 +323,10 @@ public class ParadaDAO {
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
 					existe = true;
+					logger.info("Parada encontrada correctamente");
 				}
 			}
+			
 		} catch (SQLException e) {
 			logger.severe("Error al buscar parada: " + e.getMessage());
 		}

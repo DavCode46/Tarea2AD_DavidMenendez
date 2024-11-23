@@ -15,7 +15,7 @@ import davidmb.utils.MyLogger;
 
 public class CarnetDAO {
 
-	private static final Logger logger = Logger.getLogger(MyLogger.class.getName());
+	private static final Logger logger = Logger.getLogger(CarnetDAO.class.getName());
 	ConexionDB con = ConexionDB.getInstancia();
 
 	public Optional<Long> insertarCarnet(Carnet carnet) {
@@ -41,7 +41,7 @@ public class CarnetDAO {
 						carnet.setId(rs.getLong(1));
 					}
 				}
-				logger.log(Level.INFO, "Carnet insertado con ID: " + carnet.getId());
+				logger.log(Level.INFO, "Carnet insertado" + carnet);
 				return Optional.of(carnet.getId());
 			}
 
