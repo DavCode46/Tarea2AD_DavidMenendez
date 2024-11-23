@@ -118,8 +118,6 @@ public class Principal {
 							userActivo = new Sesion(u.getNombreUsuario(), Perfil.valueOf(u.getPerfil()), u.getId());
 						}
 
-//						JOptionPane.showMessageDialog(null, "Bienvenido " + nombreUsuario + "!\nPerfil: "
-//								+ userActivo.getPerfil() + "\nID: " + userActivo.getId());
 					} else {
 						JOptionPane.showMessageDialog(null, "Credenciales incorrectas.");
 						continue;

@@ -540,7 +540,7 @@ public class ControladorPrincipal {
 
 
 	public void mostrarEstanciasPeregrinos(LocalDate fechaInicio, LocalDate fechaFin, Parada parada) {
-		ExportarEstanciasPeregrinosXML exportarEstancias = new ExportarEstanciasPeregrinosXML(fechaInicio, fechaFin, parada);
+	    ExportarEstanciasPeregrinosXML exportarEstancias = new ExportarEstanciasPeregrinosXML(fechaInicio, fechaFin, parada);
 	    PeregrinosController pec = new PeregrinosController();
 	    List<Estancia> estanciasParada = obtenerEstanciasPorIdParada(parada.getId());
 	    String[] columnas = { "ID", "Peregrino", "Fecha", "VIP" };
@@ -552,14 +552,6 @@ public class ControladorPrincipal {
 	        public boolean isCellEditable(int row, int column) {
 	            return false; // Evita que el usuario pueda editar las celdas de la tabla
 	        }
-
-	        @Override
-	        public Class<?> getColumnClass(int columnIndex) {
-	            if (columnIndex == 3) { // Columna "VIP"
-	                return ImageIcon.class; // Indicar que esta columna contendrá una imagen
-	            }
-	            return super.getColumnClass(columnIndex);
-	        }
 	    };
 
 	    // Rellenar el modelo con datos de las estancias
@@ -567,37 +559,16 @@ public class ControladorPrincipal {
 	        Optional<Peregrino> peregrinoOptional = pec.obtenerPeregrinoPorId(e.getPeregrino());
 	        if (peregrinoOptional.isPresent()) {
 	            Peregrino p = peregrinoOptional.get();
-	            
-	            // Crear el archivo de imagen para la columna "VIP"
-	            ImageIcon vipImage = new ImageIcon(e.isVip() ? "src/main/resources/check.png" : null);
-	            
+
 	            // Añadir la fila con la imagen en la columna "VIP"
-	            
-				if (e.getFecha().isAfter(fechaInicio) && e.getFecha().isBefore(fechaFin)) {
-					modeloTabla.addRow(new Object[] { e.getId(), p.getNombre(), e.getFecha(), vipImage });
-				}
+	            if (e.getFecha().isAfter(fechaInicio) && e.getFecha().isBefore(fechaFin)) {
+	                modeloTabla.addRow(new Object[] { e.getId(), p.getNombre(), e.getFecha(), e.isVip() ? "Sí" : "No" });
+	            }
 	        }
 	    }
 
 	    // Tabla
-	    JTable tablaPeregrinos = new JTable(modeloTabla) {
-	        private static final long serialVersionUID = 1L;
-
-	        @Override
-	        public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-	            Component c = super.prepareRenderer(renderer, row, column);
-	            
-	            if (column == 3) { // Si es la columna "VIP"
-	                // Redimensionar la imagen para que se ajuste al tamaño de la celda
-	                JLabel label = (JLabel) c;
-	                ImageIcon icon = (ImageIcon) label.getIcon();
-	                Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH); // Redimensionar la imagen
-	                label.setIcon(new ImageIcon(img));
-	            }
-	            return c;
-	        }
-	    };
-
+	    JTable tablaPeregrinos = new JTable(modeloTabla);
 	    tablaPeregrinos.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
 	    // Panel Tabla
@@ -614,17 +585,15 @@ public class ControladorPrincipal {
 	            JOptionPane.INFORMATION_MESSAGE);
 
 	    if (option == JOptionPane.OK_OPTION) {
-	    	try {
-				exportarEstancias.exportarEstancias();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} else {
-			return; // cancelado
-		}
+	        try {
+	            exportarEstancias.exportarEstancias();
+	        } catch (Exception e) {
+	            e.printStackTrace(); 
+	        }
+	    } else {
+	        return; // Cancelado
+	    }
 	}
-
 
 	/**
 	 * Valida un String según los criterios establecidos (no vacío, sin espacios

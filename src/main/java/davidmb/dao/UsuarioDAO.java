@@ -72,7 +72,6 @@ public class UsuarioDAO {
 	public boolean validarCredenciales(String nombre, String password) {
 		String sql = "SELECT * FROM Usuarios WHERE usuario = ? AND password = ?";
 
-		System.out.println("Validando credenciales: " + nombre + ", " + password);
 		boolean ret = false;
 		try (Connection connection = con.getConexion();
 			PreparedStatement stmt = connection.prepareStatement(sql);
