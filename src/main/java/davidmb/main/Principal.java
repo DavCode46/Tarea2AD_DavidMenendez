@@ -93,10 +93,7 @@ public class Principal {
 						break;
 					}
 
-					if (nombreUsuario.equals(usuarioAdmin) && contrasenia.equals(contraseniaAdmin)) {
-						userActivo = new Sesion(usuarioAdmin, Perfil.administrador, 1L);
-
-					} else if (sistema.validarCredenciales(nombreUsuario, contrasenia)) {
+					 if (sistema.validarCredenciales(nombreUsuario, contrasenia)) {
 
 						Optional<Usuario> usuarioOptional = sistema.login(nombreUsuario, contrasenia);
 						if (usuarioOptional.isPresent()) {

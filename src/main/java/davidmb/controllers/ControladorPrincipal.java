@@ -1,8 +1,6 @@
 package davidmb.controllers;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -11,7 +9,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
-import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -19,7 +17,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -138,6 +135,8 @@ public class ControladorPrincipal {
 		EstanciasController e = new EstanciasController();
 		return e.insertarEstancia(estancia);
 	}
+	
+
 
 
 	public Peregrino registrarPeregrino() {
@@ -576,23 +575,32 @@ public class ControladorPrincipal {
 	    panel.add(new JScrollPane(tablaPeregrinos), BorderLayout.CENTER);
 
 	    // InputField para la inserción del ID
-	    JPanel inputPanel = new JPanel(new BorderLayout(5, 5));
-	    inputPanel.add(new JLabel("¿Deseas exportar las estancias?"), BorderLayout.WEST);
-	    panel.add(inputPanel, BorderLayout.SOUTH);
-
-	    // Añadir el panel principal a un JOptionPane.showConfirmDialog
-	    int option = JOptionPane.showConfirmDialog(null, panel, "Peregrinos disponibles:", JOptionPane.OK_CANCEL_OPTION,
-	            JOptionPane.INFORMATION_MESSAGE);
-
-	    if (option == JOptionPane.OK_OPTION) {
-	        try {
-	            exportarEstancias.exportarEstancias();
-	        } catch (Exception e) {
-	            e.printStackTrace(); 
-	        }
-	    } else {
-	        return; // Cancelado
-	    }
+	    JPanel buttonPanel = new JPanel(new BorderLayout(5, 5));
+	   // buttonPanel.add(new JLabel("¿Deseas exportar las estancias?"), BorderLayout.WEST);
+	    JButton exportButton = new JButton("Exportar en XML");
+	    exportButton.addActionListener(e -> {
+	    	try {
+	    		exportarEstancias.exportarEstancias();
+	    	}catch(Exception ex) {
+	    		
+	    		JOptionPane.showMessageDialog(null, "Error al exportar las estancias", "Error", JOptionPane.ERROR_MESSAGE);
+	    		ex.printStackTrace();
+	    		
+	    	}
+	    });
+	    buttonPanel.add(exportButton, BorderLayout.CENTER);
+	    panel.add(buttonPanel, BorderLayout.SOUTH);
+	   // JOptionPane.showMessageDialog(null, panel, "Estancias de peregrinos", JOptionPane.INFORMATION_MESSAGE);
+	    JOptionPane.showOptionDialog(
+	            null,             
+	            panel,             
+	            "Estancias de peregrinos",  
+	            JOptionPane.DEFAULT_OPTION, 
+	            JOptionPane.INFORMATION_MESSAGE,
+	            null,              
+	            new Object[] {"Cerrar"},  
+	            "Cerrar"           
+	        );
 	}
 
 	/**

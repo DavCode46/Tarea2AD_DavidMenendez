@@ -33,4 +33,6 @@ public class UsuariosController {
 	public boolean validarCredenciales(String nombre, String password) {
 		return usuariosService.validarCredenciales(nombre, password);
 	}
+	
+
 }

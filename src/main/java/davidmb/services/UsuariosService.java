@@ -32,4 +32,6 @@ public class UsuariosService {
 	public boolean validarCredenciales(String nombre, String password) {
 		return usuarioDAO.validarCredenciales(nombre, password);
 	}
+	
+
 }

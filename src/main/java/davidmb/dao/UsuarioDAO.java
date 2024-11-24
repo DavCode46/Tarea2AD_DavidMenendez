@@ -93,6 +93,8 @@ public class UsuarioDAO {
 		return ret;
 	}
 	
+	
+	
 	public boolean usuarioExiste(String usuario) {
 		boolean existe = false;
 		String sql = "SELECT * FROM Usuarios WHERE usuario = ?";
