@@ -37,7 +37,6 @@ public class Principal {
 	public static void main(String[] args) {
 		MyLogger.init();
 		mostrarMenu();
-
 	}
 
 	/**
@@ -365,15 +364,10 @@ public class Principal {
 			}
 			switch (opcion) {
 			case "1": {
-				LocalDate fechaInicio;
-				LocalDate fechaFin;
-				do {
-					fechaInicio = sistema.obtenerEntradaFecha("Introduce la fecha de inicio", "Fecha de Inicio");
-					fechaFin = sistema.obtenerEntradaFecha("Introduce la fecha de Fin", "Fecha de Fin");
-				} while (!sistema.validarFechas(fechaInicio, fechaFin));
-				sistema.mostrarEstanciasPeregrinos(fechaInicio, fechaFin, parada);				
-				break;
+			    sistema.mostrarMenuExportar(parada);
+			    break;
 			}
+
 			case "2": {
 				// Sellar carnet
 				Peregrino peregrino = null;

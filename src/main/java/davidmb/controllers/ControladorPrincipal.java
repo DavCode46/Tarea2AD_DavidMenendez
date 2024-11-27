@@ -1,6 +1,7 @@
 package davidmb.controllers;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -10,12 +11,14 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -47,8 +50,7 @@ public class ControladorPrincipal {
 
 	private ControladorPrincipal controladorPrincipal;
 
-	//private Map<String, Sesion> credenciales = new HashMap<>();
-
+	// private Map<String, Sesion> credenciales = new HashMap<>();
 
 	/**
 	 * Constructor por defecto.
@@ -61,8 +63,6 @@ public class ControladorPrincipal {
 		super();
 		this.controladorPrincipal = controladorPrincipal;
 	}
-
-
 
 	/**
 	 * Obtiene el ID asociado a un nombre de usuario.
@@ -135,15 +135,17 @@ public class ControladorPrincipal {
 		EstanciasController e = new EstanciasController();
 		return e.insertarEstancia(estancia);
 	}
-	
 
-
+	public String mostrarInformacionParada(Parada parada) {
+		return "Parada:\nID: " + parada.getId() + "\nNombre: " + parada.getNombre() + "\nRegión: " + parada.getRegion()
+				+ "\nResponsable: " + parada.getResponsable();
+	}
 
 	public Peregrino registrarPeregrino() {
 		ParadasController pc = new ParadasController();
 		PeregrinosController pec = new PeregrinosController();
 		CarnetsController cc = new CarnetsController();
-		Peregrino nuevoPeregrino = null;	
+		Peregrino nuevoPeregrino = null;
 		Carnet carnet = null;
 		String nombre;
 		String nombreUsuario;
@@ -200,7 +202,7 @@ public class ControladorPrincipal {
 				carnet = new Carnet(paradaEncontrada);
 				paradaEncontrada.getPeregrinos().add(nuevoPeregrino.getId());
 				Optional<Long> idCarnetOptional = cc.insertarCarnet(carnet);
-				
+
 				if (idCarnetOptional.isPresent()) {
 					JOptionPane.showMessageDialog(null, "Carnet creado correctamente");
 					nuevoPeregrino.getCarnet().setId(idCarnetOptional.get());
@@ -222,6 +224,40 @@ public class ControladorPrincipal {
 
 		} while (pec.nombrePeregrinoExiste(nombre));
 		return null;
+	}
+
+	public void mostrarMenuExportar(Parada parada) {
+		LocalDate fechaInicio;
+		LocalDate fechaFin;
+		String informacionParada = mostrarInformacionParada(parada);
+		boolean fechasCorrectas = false;
+		boolean continuarExportando = true;
+		do {
+			do {
+				JOptionPane.showMessageDialog(null, informacionParada);
+				fechaInicio = obtenerEntradaFecha("Introduce la fecha de inicio", "Fecha de Inicio");
+				fechaFin = obtenerEntradaFecha("Introduce la fecha de Fin", "Fecha de Fin");
+				String mensaje = String.format("Fecha de inicio: %s\nFecha de fin: %s\n", fechaInicio, fechaFin);
+				int confirmacion = JOptionPane.showConfirmDialog(null,
+						"¿Son Correctos los datos?\n" + informacionParada + "\n" + mensaje, "Confirmar",
+						JOptionPane.YES_NO_OPTION);
+
+				if (confirmacion == JOptionPane.NO_OPTION) {
+
+					continue;
+				} else if (confirmacion == JOptionPane.YES_OPTION) {
+
+					if (validarFechas(fechaInicio, fechaFin)) {
+						fechasCorrectas = true;
+					} else {
+						JOptionPane.showMessageDialog(null, "Las fechas no son válidas. Inténtalo de nuevo.");
+					}
+				}
+
+			} while (!fechasCorrectas);
+
+			continuarExportando = mostrarEstanciasPeregrinos(fechaInicio, fechaFin, parada);
+		} while (continuarExportando);
 	}
 
 	/**
@@ -256,10 +292,10 @@ public class ControladorPrincipal {
 				Usuario u = new Usuario(nombreUsuario, contrasenia, "peregrino");
 				Optional<Long> idUsuario = uc.insertarUsuario(u);
 				Long idUsuarioValue = -1L;
-				if(idUsuario.isPresent()) {
+				if (idUsuario.isPresent()) {
 					idUsuarioValue = idUsuario.orElse(null);
-                  } 
-				
+				}
+
 				Peregrino nuevoPeregrino = new Peregrino(nombre, nacionalidad, new Carnet(paradaObj), idUsuarioValue);
 
 				return nuevoPeregrino;
@@ -314,9 +350,9 @@ public class ControladorPrincipal {
 			Usuario u = new Usuario(nuevoNombreUsuario, nuevaContrasenia, "peregrino");
 			Optional<Long> idUsuario = uc.insertarUsuario(u);
 			Long idUsuarioValue = -1L;
-			if(idUsuario.isPresent()) {
+			if (idUsuario.isPresent()) {
 				idUsuarioValue = idUsuario.orElse(null);
-              } 
+			}
 			Peregrino nuevoPeregrino = new Peregrino(nuevoNombre, nuevaNacionalidad, new Carnet(paradaObj),
 					idUsuarioValue);
 			nuevoPeregrino.getParadas().add(paradaObj.getId());
@@ -328,7 +364,7 @@ public class ControladorPrincipal {
 	/**
 	 * Muestra las paradas registradas en el sistema.
 	 * 
-	 * @param isPeregrino    Si es true, muestra solo el nombre y región.
+	 * @param isPeregrino Si es true, muestra solo el nombre y región.
 	 * @return Lista de paradas formateada como cadena.
 	 */
 	@SuppressWarnings("unchecked")
@@ -364,7 +400,7 @@ public class ControladorPrincipal {
 			JOptionPane.showMessageDialog(null, "La parada ya existe");
 			return false;
 		}
-		
+
 		Optional<Long> idParadaInsertada = pc.insertarParada(parada);
 		if (idParadaInsertada.isPresent()) {
 			JOptionPane.showMessageDialog(null, "Parada registrada con éxito");
@@ -388,7 +424,6 @@ public class ControladorPrincipal {
 		ParadasController pc = new ParadasController();
 		return pc.insertarPeregrinosParadas(idPeregrino, idParada, fecha);
 	}
-
 
 	/**
 	 * Muestra la lista de países disponibles cargada desde el archivo XML.
@@ -532,75 +567,90 @@ public class ControladorPrincipal {
 			return null; // cancelado
 		}
 	}
-	
-	
+
 	// Mostrar estancias de peregrinos
-	
 
+	public boolean mostrarEstanciasPeregrinos(LocalDate fechaInicio, LocalDate fechaFin, Parada parada) {
+		ExportarEstanciasPeregrinosXML exportarEstancias = new ExportarEstanciasPeregrinosXML(fechaInicio, fechaFin,
+				parada);
+		PeregrinosController pec = new PeregrinosController();
+		List<Estancia> estanciasParada = obtenerEstanciasPorIdParada(parada.getId());
+		String[] columnas = { "ID", "Peregrino", "Fecha", "VIP" };
 
-	public void mostrarEstanciasPeregrinos(LocalDate fechaInicio, LocalDate fechaFin, Parada parada) {
-	    ExportarEstanciasPeregrinosXML exportarEstancias = new ExportarEstanciasPeregrinosXML(fechaInicio, fechaFin, parada);
-	    PeregrinosController pec = new PeregrinosController();
-	    List<Estancia> estanciasParada = obtenerEstanciasPorIdParada(parada.getId());
-	    String[] columnas = { "ID", "Peregrino", "Fecha", "VIP" };
+		boolean ret = false;
 
-	    DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0) {
-	        private static final long serialVersionUID = 1L;
+		DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0) {
+			private static final long serialVersionUID = 1L;
 
-	        @Override
-	        public boolean isCellEditable(int row, int column) {
-	            return false; // Evita que el usuario pueda editar las celdas de la tabla
-	        }
-	    };
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false; // Evita que el usuario pueda editar las celdas de la tabla
+			}
+		};
 
-	    // Rellenar el modelo con datos de las estancias
-	    for (Estancia e : estanciasParada) {
-	        Optional<Peregrino> peregrinoOptional = pec.obtenerPeregrinoPorId(e.getPeregrino());
-	        if (peregrinoOptional.isPresent()) {
-	            Peregrino p = peregrinoOptional.get();
+		// Rellenar el modelo con datos de las estancias
+		for (Estancia e : estanciasParada) {
+			Optional<Peregrino> peregrinoOptional = pec.obtenerPeregrinoPorId(e.getPeregrino());
+			if (peregrinoOptional.isPresent()) {
+				Peregrino p = peregrinoOptional.get();
 
-	            // Añadir la fila con la imagen en la columna "VIP"
-	            if (e.getFecha().isAfter(fechaInicio) && e.getFecha().isBefore(fechaFin)) {
-	                modeloTabla.addRow(new Object[] { e.getId(), p.getNombre(), e.getFecha(), e.isVip() ? "Sí" : "No" });
-	            }
-	        }
-	    }
+				// Añadir la fila con la imagen en la columna "VIP"
+				if (e.getFecha().isAfter(fechaInicio) && e.getFecha().isBefore(fechaFin)) {
+					modeloTabla
+							.addRow(new Object[] { e.getId(), p.getNombre(), e.getFecha(), e.isVip() ? "Sí" : "No" });
+				}
+			}
+		}
 
-	    // Tabla
-	    JTable tablaPeregrinos = new JTable(modeloTabla);
-	    tablaPeregrinos.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		// Tabla
+		JTable tablaPeregrinos = new JTable(modeloTabla);
+		tablaPeregrinos.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
-	    // Panel Tabla
-	    JPanel panel = new JPanel(new BorderLayout(5, 5));
-	    panel.add(new JScrollPane(tablaPeregrinos), BorderLayout.CENTER);
+		// Panel Tabla
+		JPanel panel = new JPanel(new BorderLayout(5, 5));
+		panel.add(new JScrollPane(tablaPeregrinos), BorderLayout.CENTER);
 
-	    // InputField para la inserción del ID
-	    JPanel buttonPanel = new JPanel(new BorderLayout(5, 5));
-	   // buttonPanel.add(new JLabel("¿Deseas exportar las estancias?"), BorderLayout.WEST);
-	    JButton exportButton = new JButton("Exportar en XML");
-	    exportButton.addActionListener(e -> {
-	    	try {
-	    		exportarEstancias.exportarEstancias();
-	    	}catch(Exception ex) {
-	    		
-	    		JOptionPane.showMessageDialog(null, "Error al exportar las estancias", "Error", JOptionPane.ERROR_MESSAGE);
-	    		ex.printStackTrace();
-	    		
-	    	}
-	    });
-	    buttonPanel.add(exportButton, BorderLayout.CENTER);
-	    panel.add(buttonPanel, BorderLayout.SOUTH);
-	   // JOptionPane.showMessageDialog(null, panel, "Estancias de peregrinos", JOptionPane.INFORMATION_MESSAGE);
-	    JOptionPane.showOptionDialog(
-	            null,             
-	            panel,             
-	            "Estancias de peregrinos",  
-	            JOptionPane.DEFAULT_OPTION, 
-	            JOptionPane.INFORMATION_MESSAGE,
-	            null,              
-	            new Object[] {"Cerrar"},  
-	            "Cerrar"           
-	        );
+		// InputField para la inserción del ID
+		JPanel buttonPanel = new JPanel(new BorderLayout(5, 5));
+		// buttonPanel.add(new JLabel("¿Deseas exportar las estancias?"),
+		// BorderLayout.WEST);
+		JButton exportButton = new JButton("Exportar en XML");
+//		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+//		JLabel labelOpciones = new JLabel("¿Deseas introducir otras fechas?");
+//		labelPanel.add(labelOpciones);
+//		buttonPanel.add(labelPanel, BorderLayout.SOUTH);
+	 
+
+		exportButton.addActionListener(e -> {
+			try {
+				exportarEstancias.exportarEstancias();
+			} catch (Exception ex) {
+
+				JOptionPane.showMessageDialog(null, "Error al exportar las estancias", "Error",
+						JOptionPane.ERROR_MESSAGE);
+				ex.printStackTrace();
+
+			}
+		});
+		buttonPanel.add(exportButton, BorderLayout.CENTER);
+
+		panel.add(buttonPanel, BorderLayout.SOUTH);
+
+		  int opcion2 = JOptionPane.showOptionDialog(
+		      null, // Componente padre, en este caso null para centrarlo en la pantalla
+		      panel, // Panel que contiene la información y botones
+		      "Estancias de peregrinos", // Título de la ventana
+		      JOptionPane.YES_NO_OPTION, // Opciones que se muestran (sí/no) 
+		      JOptionPane.INFORMATION_MESSAGE, // Tipo de mensaje
+		      null, // Icono --> nulo
+		      new Object[] {"Seleccionar otras fechas", "Cancelar"}, // Opciones personalizadas para los botones
+		      "Cancelar" // Opción por defecto
+		  );
+		  if(opcion2 == JOptionPane.YES_OPTION) {
+			  ret = true;
+		  }
+		
+		return ret;
 	}
 
 	/**

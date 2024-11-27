@@ -122,7 +122,7 @@ public class ConexionDB implements AutoCloseable {
 
 	public static void main(String[] args) {
 		try (ConexionDB conexionDB = ConexionDB.getInstancia()) {
-			//conexionDB.crearDB();
+			conexionDB.crearDB();
 			Connection conn = conexionDB.getConexion();
 			if (conn != null) {
 				logger.info("Conexión establecida correctamente");
