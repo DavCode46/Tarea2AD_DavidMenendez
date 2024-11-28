@@ -1,7 +1,6 @@
 package davidmb.controllers;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -9,16 +8,15 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,6 +32,7 @@ import davidmb.models.Carnet;
 import davidmb.models.Estancia;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
+import davidmb.models.Perfil;
 import davidmb.models.Usuario;
 
 /**
@@ -49,8 +48,6 @@ import davidmb.models.Usuario;
 public class ControladorPrincipal {
 
 	private ControladorPrincipal controladorPrincipal;
-
-	// private Map<String, Sesion> credenciales = new HashMap<>();
 
 	/**
 	 * Constructor por defecto.
@@ -139,6 +136,74 @@ public class ControladorPrincipal {
 	public String mostrarInformacionParada(Parada parada) {
 		return "Parada:\nID: " + parada.getId() + "\nNombre: " + parada.getNombre() + "\nRegión: " + parada.getRegion()
 				+ "\nResponsable: " + parada.getResponsable();
+	}
+	
+	public void sellarCarnet(Parada parada) {
+		Peregrino peregrino = null;
+		Estancia nuevaEstancia = null;
+		boolean ret = false;
+		Long idPeregrinoLong = -1L;
+		do {
+			String idPeregrino = mostrarPeregrinos();
+			try {
+				idPeregrinoLong = Long.parseLong(idPeregrino);
+			}catch(NumberFormatException ex) {
+				JOptionPane.showMessageDialog(null, "El ID del peregrino es incorrecto", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}while(!peregrinoExiste(idPeregrinoLong));
+		Optional<Peregrino> peregrinoOptional = obtenerPeregrinoPorId(idPeregrinoLong);
+		System.out.println(peregrinoOptional);
+		
+		if(peregrinoOptional.isPresent()) {
+			peregrino = peregrinoOptional.get();
+		} else {
+			JOptionPane.showMessageDialog(null, "Error al obtener el peregrino", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		Optional<Long> idPeregrinosParadas = insertarPeregrinosParadas(idPeregrinoLong, parada.getId(), LocalDate.now());
+		
+		peregrino.getParadas().add(parada.getId());
+		parada.getPeregrinos().add(peregrino.getId());
+		if(idPeregrinosParadas.isPresent()) {
+			JOptionPane.showMessageDialog(null, "Parada registrada correctamente", "Parada registrada", JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			JOptionPane.showMessageDialog(null, "Error al registrar la parada", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		Random distanciaRandom = new Random();
+		int numeroAleatorio = distanciaRandom.nextInt(500);
+		
+		peregrino.getCarnet().setDistancia(peregrino.getCarnet().getDistancia() + numeroAleatorio);
+		
+		int registrarEstancia = JOptionPane.showConfirmDialog(null, "¿Deseas realizar una estancia?","Realizar estancia", JOptionPane.YES_NO_OPTION);
+		Optional<Long> isEstanciaOptional = null;
+		if(registrarEstancia == JOptionPane.YES_OPTION) {
+			int esVip = JOptionPane.showConfirmDialog(null, "¿La estancia será VIP?","Estancia VIP", JOptionPane.YES_NO_OPTION);
+			if(esVip == JOptionPane.YES_OPTION) {
+				peregrino.getCarnet().setnVips(peregrino.getCarnet().getnVips() + 1);
+				nuevaEstancia = new Estancia(LocalDate.now(), true, peregrino.getId(), parada.getId());
+				isEstanciaOptional = insertarEstancia(nuevaEstancia);
+				if(isEstanciaOptional.isPresent()) {
+					Long idEstancia = isEstanciaOptional.get();
+					peregrino.getEstancias().add(idEstancia);
+				}
+			} else {
+				nuevaEstancia = new Estancia(LocalDate.now(), false, peregrino.getId(), parada.getId());
+				isEstanciaOptional = insertarEstancia(nuevaEstancia);	
+			}
+			if(isEstanciaOptional.isPresent()) {
+				Long idEstancia = isEstanciaOptional.get();
+				peregrino.getEstancias().add(idEstancia);
+				JOptionPane.showMessageDialog(null, "Estancia realizada correctamente", "Estancias", JOptionPane.INFORMATION_MESSAGE);
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "Ha elegido no realizar estancia");
+		}
+		ret = modificarCarnet(peregrino.getCarnet());
+		if(ret) {
+			JOptionPane.showMessageDialog(null, "Carnet sellado correctamente", "Sellado correcto", JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			JOptionPane.showMessageDialog(null, "Error al sellar el carnet", "Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	public Peregrino registrarPeregrino() {
@@ -289,7 +354,9 @@ public class ControladorPrincipal {
 
 				Optional<Parada> paradaObjOptional = pc.obtenerParadaPorNombre(parada);
 				Parada paradaObj = paradaObjOptional.orElse(null);
-				Usuario u = new Usuario(nombreUsuario, contrasenia, "peregrino");
+			//	Usuario u = new Usuario(nombreUsuario, contrasenia, "peregrino");
+				Usuario u = new Usuario(nombreUsuario, Perfil.peregrino);
+				u.setPassword(contrasenia);
 				Optional<Long> idUsuario = uc.insertarUsuario(u);
 				Long idUsuarioValue = -1L;
 				if (idUsuario.isPresent()) {
@@ -347,7 +414,9 @@ public class ControladorPrincipal {
 
 			Optional<Parada> paradaObjOptional = pc.obtenerParadaPorNombre(parada);
 			Parada paradaObj = paradaObjOptional.orElse(null);
-			Usuario u = new Usuario(nuevoNombreUsuario, nuevaContrasenia, "peregrino");
+		//	Usuario u = new Usuario(nuevoNombreUsuario, nuevaContrasenia, "peregrino");
+			Usuario u = new Usuario(nuevoNombreUsuario, Perfil.peregrino);
+			u.setPassword(nuevaContrasenia);
 			Optional<Long> idUsuario = uc.insertarUsuario(u);
 			Long idUsuarioValue = -1L;
 			if (idUsuario.isPresent()) {

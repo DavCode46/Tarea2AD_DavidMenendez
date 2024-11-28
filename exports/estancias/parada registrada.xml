@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<parada>
+    <id>6</id>
+    <parada>parada registrada</parada>
+    <region>s</region>
+    <fecha-inicio>2020-11-11</fecha-inicio>
+    <fecha-fin>2025-11-11</fecha-fin>
+    <estancias>
+        <estancia>
+            <id>9</id>
+            <peregrino>jacinto</peregrino>
+            <fecha>2024-11-28</fecha>
+            <vip>Sí</vip>
+        </estancia>
+    </estancias>
+</parada>

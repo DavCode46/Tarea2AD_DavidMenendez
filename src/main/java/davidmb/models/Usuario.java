@@ -7,16 +7,15 @@ public class Usuario {
 	private Long id;
 	private String nombreUsuario;
 	private String password;
-	private String perfil;
+	private Perfil perfil;
 	
 	public Usuario() {
 		super();
 	}
 	
-	public Usuario(String nombreUsuario, String password, String perfil) {
+	public Usuario(String nombreUsuario, Perfil perfil) {
 		super();
 		this.nombreUsuario = nombreUsuario;
-		this.password = password;
 		this.perfil = perfil;
 	}
 	
@@ -44,11 +43,11 @@ public class Usuario {
 		this.password = password;
 	}
 	
-	public String getPerfil() {
+	public Perfil getPerfil() {
 		return perfil;
 	}
 	
-	public void setPerfil(String perfil) {
+	public void setPerfil(Perfil perfil) {
 		this.perfil = perfil;
 	}
 	

@@ -27,7 +27,7 @@ import davidmb.utils.MyLogger;
  */
 public class Principal {
 
-	static Sesion userActivo = new Sesion("Invitado", Perfil.invitado, 1L);
+	static Usuario userActivo = new Usuario("Invitado", Perfil.invitado);
 
 	/**
 	 * Método principal que inicia el programa mostrando el menú principal.
@@ -96,13 +96,13 @@ public class Principal {
 
 						Optional<Usuario> usuarioOptional = sistema.login(nombreUsuario, contrasenia);
 						if (usuarioOptional.isPresent()) {
-							if (usuarioOptional.get().getPerfil().equalsIgnoreCase("peregrino")) {
+							if (usuarioOptional.get().getPerfil() == Perfil.peregrino) {
 								Optional<Peregrino> peregrinoOptional = sistema
 										.obtenerPeregrinoPorIdUsuario(usuarioOptional.get().getId());
 								if (peregrinoOptional.isPresent()) {
 									p = peregrinoOptional.get();
 								}
-							} else if (usuarioOptional.get().getPerfil().equalsIgnoreCase("parada")) {
+							} else if (usuarioOptional.get().getPerfil() == Perfil.parada) {
 								Optional<Parada> paradaOptional = sistema
 										.obtenerParadaPorIdUsuario(usuarioOptional.get().getId());
 								if (paradaOptional.isPresent()) {
@@ -111,7 +111,8 @@ public class Principal {
 							}
 
 							Usuario u = usuarioOptional.get();
-							userActivo = new Sesion(u.getNombreUsuario(), Perfil.valueOf(u.getPerfil()), u.getId());
+							userActivo = new Usuario(u.getNombreUsuario(), u.getPerfil());
+							userActivo.setId(u.getId());
 						}
 
 					} else {
@@ -147,7 +148,7 @@ public class Principal {
 				System.out.println(p);
 
 				if (p != null) {
-					userActivo = new Sesion(p.getNombre(), Perfil.peregrino, p.getId());
+					userActivo = new Usuario(p.getNombre(), Perfil.peregrino);
 					String mensajeBienvenida = String.format(
 							"Sus datos:\n" + "ID: %s\n" + "Nombre: %s\n" + "Nacionalidad: %s\n"
 									+ "Fecha de expedición del carnet: %s\n" + "Parada inicial: %s\n"
@@ -174,7 +175,7 @@ public class Principal {
 						JOptionPane.YES_NO_OPTION);
 				if (respuesta == JOptionPane.YES_OPTION) {
 					JOptionPane.showMessageDialog(null, "Has salido del sistema.");
-					userActivo = new Sesion("Invitado", Perfil.invitado, 1L);
+					userActivo = new Usuario("Invitado", Perfil.invitado);
 					break;
 				}
 				JOptionPane.showMessageDialog(null, "Volviendo al menú...");
@@ -199,7 +200,7 @@ public class Principal {
 		ExportarCarnetXML exportar = new ExportarCarnetXML();
 		String opcion = "";
 		do {
-			String menu = "1. Exportar carnet\n" + "2. Sellar carnet (No disponible)\n" + "0. Cerrar sesión\n";
+			String menu = "1. Exportar carnet\n" + "0. Cerrar sesión\n";
 
 			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true, false);
 			if (opcion == null) {
@@ -220,17 +221,12 @@ public class Principal {
 				}
 				break;
 			}
-			case "2": {
-				// Sellar carnet
-				JOptionPane.showMessageDialog(null, "Sección en desarrollo...");
-				break;
-			}
 			case "0": {
 				int respuesta = JOptionPane.showConfirmDialog(null, "¿Estás seguro que quieres cerrar sesión?",
 						"Confirmar", JOptionPane.YES_NO_OPTION);
 				if (respuesta == JOptionPane.YES_OPTION) {
 					JOptionPane.showMessageDialog(null, "Has cerrado sesión.");
-					userActivo = new Sesion("Invitado", Perfil.invitado, 1L);
+					userActivo = new Usuario("Invitado", Perfil.invitado);
 					return;
 				}
 				JOptionPane.showMessageDialog(null, "Volviendo al menú...");
@@ -307,7 +303,8 @@ public class Principal {
 				} else {
 					if (!sistema.validarCredenciales(responsable, contraseniaResponsable)) {
 
-						Usuario u = new Usuario(responsable, contraseniaResponsable, "parada");
+						Usuario u = new Usuario(responsable, Perfil.parada);
+						u.setPassword(contraseniaResponsable);
 						Optional<Long> idUsuarioOptional = sistema.insertarUsuario(u);
 						if(idUsuarioOptional.isPresent()) {
 							Parada nuevaParada = new Parada(nombreParada, region, responsable);
@@ -329,7 +326,7 @@ public class Principal {
 						"Confirmar", JOptionPane.YES_NO_OPTION);
 				if (respuesta == JOptionPane.YES_OPTION) {
 					JOptionPane.showMessageDialog(null, "Has cerrado sesión.");
-					userActivo = new Sesion("Invitado", Perfil.invitado, 1L);
+					userActivo = new Usuario("Invitado", Perfil.invitado);
 					return;
 				}
 				JOptionPane.showMessageDialog(null, "Volviendo al menú...");
@@ -343,15 +340,7 @@ public class Principal {
 	}
 
 	public static void mostrarOpcionesParada(Parada parada, ControladorPrincipal sistema) {
-		/**
-		 * CU3: Exportar datos Parada: el responsable de una parada podrá exportar los
-		 * datos de las estancias de los peregrinos de su parada, en un rango de fechas
-		 * concreto. Se reflejarán los datos de la parada (id, nombre, región), el rango
-		 * de fechas seleccionado y posteriormente la lista de las estancias de los
-		 * peregrinos en ese periodo, indicando el id de la estancia, el nombre del
-		 * peregrino, la fecha en que se realizó y si fue de tipo VIP o no.
-		 */
-
+	
 		JOptionPane.showMessageDialog(null, "Bienvenido " + parada.getNombre() + "!\nPerfil: " + userActivo.getPerfil()
 				+ "\nID: " + userActivo.getId());
 		String opcion = "";
@@ -370,66 +359,7 @@ public class Principal {
 
 			case "2": {
 				// Sellar carnet
-				Peregrino peregrino = null;
-				Estancia nuevaEstancia = null;
-				boolean ret = false;
-				Long idPeregrinoLong = -1L;
-				do {
-					String idPeregrino = sistema.mostrarPeregrinos();
-					try {
-						idPeregrinoLong = Long.parseLong(idPeregrino);
-					}catch(NumberFormatException ex) {
-						JOptionPane.showMessageDialog(null, "El ID del peregrino es incorrecto", "Error", JOptionPane.ERROR_MESSAGE);
-					}
-				}while(!sistema.peregrinoExiste(idPeregrinoLong));
-				Optional<Peregrino> peregrinoOptional = sistema.obtenerPeregrinoPorId(idPeregrinoLong);
-				
-				if(peregrinoOptional.isPresent()) {
-					peregrino = peregrinoOptional.get();
-				} else {
-					JOptionPane.showMessageDialog(null, "Error al obtener el peregrino", "Error", JOptionPane.ERROR_MESSAGE);
-				}
-				Optional<Long> idPeregrinosParadas = sistema.insertarPeregrinosParadas(idPeregrinoLong, parada.getId(), LocalDate.now());
-				peregrino.getParadas().add(parada.getId());
-				parada.getPeregrinos().add(peregrino.getId());
-				if(idPeregrinosParadas.isPresent()) {
-					JOptionPane.showMessageDialog(null, "Parada registrada correctamente", "Parada registrada", JOptionPane.INFORMATION_MESSAGE);
-				} else {
-					JOptionPane.showMessageDialog(null, "Error al registrar la parada", "Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				peregrino.getCarnet().setDistancia(50);
-				
-				int registrarEstancia = JOptionPane.showConfirmDialog(null, "¿Deseas realizar una estancia?","Realizar estancia", JOptionPane.YES_NO_OPTION);
-				Optional<Long> isEstanciaOptional = null;
-				if(registrarEstancia == JOptionPane.YES_OPTION) {
-					int esVip = JOptionPane.showConfirmDialog(null, "¿La estancia será VIP?","Estancia VIP", JOptionPane.YES_NO_OPTION);
-					if(esVip == JOptionPane.YES_OPTION) {
-						peregrino.getCarnet().setnVips(peregrino.getCarnet().getnVips() + 1);
-						nuevaEstancia = new Estancia(LocalDate.now(), true, peregrino.getId(), parada.getId());
-						isEstanciaOptional = sistema.insertarEstancia(nuevaEstancia);
-						if(isEstanciaOptional.isPresent()) {
-							Long idEstancia = isEstanciaOptional.get();
-							peregrino.getEstancias().add(idEstancia);
-						}
-					} else {
-						nuevaEstancia = new Estancia(LocalDate.now(), false, peregrino.getId(), parada.getId());
-						isEstanciaOptional = sistema.insertarEstancia(nuevaEstancia);	
-					}
-					if(isEstanciaOptional.isPresent()) {
-						Long idEstancia = isEstanciaOptional.get();
-						peregrino.getEstancias().add(idEstancia);
-						JOptionPane.showMessageDialog(null, "Estancia realizada correctamente", "Estancias", JOptionPane.INFORMATION_MESSAGE);
-					}
-				} else {
-					JOptionPane.showMessageDialog(null, "Ha elegido no realizar estancia");
-				}
-				ret = sistema.modificarCarnet(peregrino.getCarnet());
-				if(ret) {
-					JOptionPane.showMessageDialog(null, "Carnet sellado correctamente", "Sellado correcto", JOptionPane.INFORMATION_MESSAGE);
-				} else {
-					JOptionPane.showMessageDialog(null, "Error al sellar el carnet", "Error", JOptionPane.ERROR_MESSAGE);
-				}
+				sistema.sellarCarnet(parada);
 				break;
 			}
 			case "0": {
@@ -438,20 +368,7 @@ public class Principal {
 			}
 			}
 
-		} while (true);
-
-		/**
-		 * CU5: Sellar/Alojarse: un administrador de parada recibe a un peregrino que
-		 * llega en su ruta a su parada. Le pide su carnet de peregrino, se sella su
-		 * paso por esa parada y se le pregunta si desea una estancia (VIP o no) en esa
-		 * parada para el día actual. Se registran los datos en a BD, y si es el caso,
-		 * también para una nueva estancia de ese peregrino en esa parada en esa fecha.
-		 * Consecuentemente, esta información pasará a estar disponible también en los
-		 * datos de la parada y del peregrino, actualizando los datos de éste relativos
-		 * a la distancia recorrida (sumando los kms. desde la parada anterior) y al nº
-		 * total de estancias VIP.
-		 */
-		
+		} while (true);	
 		
 	}
 

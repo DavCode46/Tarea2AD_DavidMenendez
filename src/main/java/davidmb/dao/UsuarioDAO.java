@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import davidmb.models.Perfil;
 import davidmb.models.Usuario;
 
 public class UsuarioDAO {
@@ -18,23 +19,40 @@ public class UsuarioDAO {
 		String sqlUsuario = "INSERT INTO Usuarios (usuario, password, perfil) VALUES (?, ?, ?)";
 		Long idUsuario = null;
 
-		try (Connection connection = con.getConexion();
-				PreparedStatement usuarioStmt = connection.prepareStatement(sqlUsuario,
-						Statement.RETURN_GENERATED_KEYS)) {
+		try (Connection connection = con.getConexion();) {
+			connection.setAutoCommit(false);
 
-			usuarioStmt.setString(1, u.getNombreUsuario());
-			usuarioStmt.setString(2, u.getPassword());
-			usuarioStmt.setString(3, u.getPerfil());
-			int rowsAffected = usuarioStmt.executeUpdate();
+			try (PreparedStatement usuarioStmt = connection.prepareStatement(sqlUsuario,
+					Statement.RETURN_GENERATED_KEYS)) {
+				usuarioStmt.setString(1, u.getNombreUsuario());
+				usuarioStmt.setString(2, u.getPassword());
+				usuarioStmt.setString(3, u.getPerfil().name());
+				int rowsAffected = usuarioStmt.executeUpdate();
 
-			if (rowsAffected > 0) {
-				try (ResultSet generatedKeys = usuarioStmt.getGeneratedKeys()) {
-					if (generatedKeys.next()) {
-						idUsuario = generatedKeys.getLong(1); // Obtener el ID generado
+				if (rowsAffected > 0) {
+					try (ResultSet generatedKeys = usuarioStmt.getGeneratedKeys()) {
+						if (generatedKeys.next()) {
+							idUsuario = generatedKeys.getLong(1); // Obtener el ID generado
+							connection.commit();
+						} else {
+							logger.warning("No se pudo obtener el ID del usuario insertado");
+							connection.rollback();
+						}
 					}
 				}
+
+				logger.info("Usuario insertado: " + u);
+			} catch (SQLException e) {
+				logger.severe("Error al insertar usuario: " + e.getMessage());
+				try {
+					connection.rollback();
+					logger.warning("Transacción revertida.");
+				} catch (SQLException rollbackEx) {
+					logger.severe("Error al hacer rollback: " + rollbackEx.getMessage());
+				}
+			} finally {
+				connection.setAutoCommit(true);
 			}
-			logger.info("Usuario insertado: " + u);
 		} catch (SQLException ex) {
 			logger.severe("Error al insertar usuario: " + ex.getMessage());
 		}
@@ -45,10 +63,9 @@ public class UsuarioDAO {
 		Usuario u = null;
 		String sql = "SELECT * FROM Usuarios WHERE usuario = ? AND password = ?";
 
-		try (Connection connection = con.getConexion();
-			PreparedStatement stmt = connection.prepareStatement(sql);
-		
-			) {
+		try (Connection connection = con.getConexion(); PreparedStatement stmt = connection.prepareStatement(sql);
+
+		) {
 
 			stmt.setString(1, usuario);
 			stmt.setString(2, password);
@@ -59,7 +76,7 @@ public class UsuarioDAO {
 					u.setId(rs.getLong("id"));
 					u.setNombreUsuario(rs.getString("usuario"));
 					// u.setPassword(rs.getString("password"));
-					u.setPerfil(rs.getString("perfil"));
+					u.setPerfil(Perfil.valueOf(rs.getString("perfil")));
 				}
 			}
 			logger.info("Usuario encontrado: " + u);
@@ -68,14 +85,12 @@ public class UsuarioDAO {
 		}
 		return Optional.ofNullable(u);
 	}
-	
+
 	public boolean validarCredenciales(String nombre, String password) {
 		String sql = "SELECT * FROM Usuarios WHERE usuario = ? AND password = ?";
 
 		boolean ret = false;
-		try (Connection connection = con.getConexion();
-			PreparedStatement stmt = connection.prepareStatement(sql);
-			) {
+		try (Connection connection = con.getConexion(); PreparedStatement stmt = connection.prepareStatement(sql);) {
 
 			stmt.setString(1, nombre);
 			stmt.setString(2, password);
@@ -92,26 +107,22 @@ public class UsuarioDAO {
 		}
 		return ret;
 	}
-	
-	
-	
+
 	public boolean usuarioExiste(String usuario) {
 		boolean existe = false;
 		String sql = "SELECT * FROM Usuarios WHERE usuario = ?";
-		
-		try(Connection connection = con.getConexion();
-			PreparedStatement stmt = connection.prepareStatement(sql);
-			) {
-			stmt.setString(1, usuario); 
-	        try (ResultSet rs = stmt.executeQuery()) { 
-	            if (rs.next()) {
-	                existe = true; 
-	            }
-	        }
-	        logger.info("Usuario encontrado: " + existe);
-			} catch (SQLException ex) {
-				logger.severe("Error al buscar usuario: " + ex.getMessage());
+
+		try (Connection connection = con.getConexion(); PreparedStatement stmt = connection.prepareStatement(sql);) {
+			stmt.setString(1, usuario);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					existe = true;
+				}
 			}
+			logger.info("Usuario encontrado: " + existe);
+		} catch (SQLException ex) {
+			logger.severe("Error al buscar usuario: " + ex.getMessage());
+		}
 		return existe;
 	}
 

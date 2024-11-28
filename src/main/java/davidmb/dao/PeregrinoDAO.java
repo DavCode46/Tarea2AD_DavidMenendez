@@ -24,23 +24,34 @@ public class PeregrinoDAO {
 		String sqlPeregrino = "INSERT INTO Peregrinos (nombre, nacionalidad, id_carnet, id_usuario) VALUES (?, ?, ?, ?)";
 		System.out.println(peregrino);
 
-		try (Connection connection = con.getConexion();
-				
-				PreparedStatement peregrinostmt = connection.prepareStatement(sqlPeregrino)) {		
+		try (Connection connection = con.getConexion();) {
+			connection.setAutoCommit(false);
 
-			// Insertar el peregrino con los nuevos ID
-			peregrinostmt.setString(1, peregrino.getNombre());
-			peregrinostmt.setString(2, peregrino.getNacionalidad());
-			peregrinostmt.setLong(3, peregrino.getCarnet().getId());
-			peregrinostmt.setLong(4, peregrino.getIdUsuario());
+			try (PreparedStatement peregrinostmt = connection.prepareStatement(sqlPeregrino)) {
+				// Insertar el peregrino con los nuevos ID
+				peregrinostmt.setString(1, peregrino.getNombre());
+				peregrinostmt.setString(2, peregrino.getNacionalidad());
+				peregrinostmt.setLong(3, peregrino.getCarnet().getId());
+				peregrinostmt.setLong(4, peregrino.getIdUsuario());
 
-			peregrinostmt.executeUpdate();
-			logger.info("Peregrino insertado: " + peregrino);
-			return Optional.of(peregrino.getIdUsuario());
-
+				peregrinostmt.executeUpdate();
+				logger.info("Peregrino insertado: " + peregrino);
+				connection.commit();
+				return Optional.of(peregrino.getIdUsuario());
+			} catch (SQLException e) {
+				logger.severe("Error al insertar peregrino: " + e.getMessage());
+				try {
+					connection.rollback();
+					logger.warning("Transacción revertida.");
+				} catch (SQLException rollbackEx) {
+					logger.severe("Error al hacer rollback: " + rollbackEx.getMessage());
+				}
+			} finally {
+				connection.setAutoCommit(true);
+			}
 		} catch (SQLException e) {
 			logger.severe("Error al insertar peregrino: " + e.getMessage());
-		}
+		} 
 		return Optional.empty();
 	}
 
@@ -200,7 +211,6 @@ public class PeregrinoDAO {
 				peregrino.setParadas(paradas);
 				logger.info("Peregrino obtenido con éxito");
 			}
-			
 
 		} catch (SQLException e) {
 			logger.severe("Error al obtener peregrino: " + e.getMessage());
@@ -281,7 +291,7 @@ public class PeregrinoDAO {
 
 				// Agregar el peregrino a la lista
 				peregrinos.add(peregrino);
-				
+
 			}
 			logger.info("Peregrinos obtenidos");
 		} catch (SQLException e) {
@@ -293,24 +303,22 @@ public class PeregrinoDAO {
 
 	public boolean peregrinoExiste(Long id) {
 		String sql = "SELECT * FROM Peregrinos WHERE id = ?";
-		try (Connection connection = con.getConexion(); 
-			PreparedStatement stmt = connection.prepareStatement(sql)) {
+		try (Connection connection = con.getConexion(); PreparedStatement stmt = connection.prepareStatement(sql)) {
 			stmt.setLong(1, id);
 			try (ResultSet rs = stmt.executeQuery()) {
 				logger.info("Peregrino existe");
 				return rs.next();
 			}
-			
+
 		} catch (SQLException e) {
 			logger.severe("Error al comprobar si el peregrino existe: " + e.getMessage());
 		}
 		return false;
 	}
-	
+
 	public boolean nombrePeregrinoExiste(String nombre) {
 		String sql = "SELECT * FROM Peregrinos WHERE nombre = ?";
-		try (Connection connection = con.getConexion(); 
-			PreparedStatement stmt = connection.prepareStatement(sql)) {
+		try (Connection connection = con.getConexion(); PreparedStatement stmt = connection.prepareStatement(sql)) {
 			stmt.setString(1, nombre);
 			try (ResultSet rs = stmt.executeQuery()) {
 				logger.info("Nombre de peregrino existe");

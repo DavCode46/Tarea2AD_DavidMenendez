@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<carnet>
+    <id>15</id>
+    <fechaexp>2024-11-28</fechaexp>
+    <expedidoen>Gijón</expedidoen>
+    <peregrino>
+        <nombre>jacinto</nombre>
+        <nacionalidad>jamaica</nacionalidad>
+    </peregrino>
+    <hoy>2024-11-28</hoy>
+    <distanciatotal>0,0</distanciatotal>
+    <paradas/>
+    <estancias/>
+</carnet>
