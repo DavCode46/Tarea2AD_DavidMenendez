@@ -143,6 +143,7 @@ public class ControladorPrincipal {
 		Estancia nuevaEstancia = null;
 		boolean ret = false;
 		Long idPeregrinoLong = -1L;
+		
 		do {
 			String idPeregrino = mostrarPeregrinos();
 			try {
@@ -152,13 +153,29 @@ public class ControladorPrincipal {
 			}
 		}while(!peregrinoExiste(idPeregrinoLong));
 		Optional<Peregrino> peregrinoOptional = obtenerPeregrinoPorId(idPeregrinoLong);
-		System.out.println(peregrinoOptional);
+	
 		
 		if(peregrinoOptional.isPresent()) {
 			peregrino = peregrinoOptional.get();
 		} else {
 			JOptionPane.showMessageDialog(null, "Error al obtener el peregrino", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
 		}
+		String mensaje = String.format("¿Son correctos los datos?\n"
+				+ "Peregrino: %s\n"
+				+ "ID: %d\n"
+				+ "Parada: %s\n"
+				+ "Responsable: %s\n"
+				+ "ID - Parada: %d\n", peregrino.getNombre(), peregrino.getId(), parada.getNombre(), parada.getResponsable(), parada.getId());
+		
+		int confirmacion = JOptionPane.showConfirmDialog(null, mensaje, "Confirmar", JOptionPane.YES_NO_OPTION);
+		
+		if (confirmacion == JOptionPane.NO_OPTION) {
+			JOptionPane.showMessageDialog(null, "Ha cancelado el sellado del carnet", "Cancelado",
+					JOptionPane.INFORMATION_MESSAGE);
+			return;
+		} 
+		System.out.println(parada.getId());
 		Optional<Long> idPeregrinosParadas = insertarPeregrinosParadas(idPeregrinoLong, parada.getId(), LocalDate.now());
 		
 		peregrino.getParadas().add(parada.getId());
@@ -311,18 +328,18 @@ public class ControladorPrincipal {
 
 					continue;
 				} else if (confirmacion == JOptionPane.YES_OPTION) {
-
+					int cont = 1;
+					System.out.println("Entro " + cont);
+					cont++;
 					if (validarFechas(fechaInicio, fechaFin)) {
 						fechasCorrectas = true;
-					} else {
-						JOptionPane.showMessageDialog(null, "Las fechas no son válidas. Inténtalo de nuevo.");
-					}
+					} 
 				}
 
 			} while (!fechasCorrectas);
-
+			fechasCorrectas = false;
 			continuarExportando = mostrarEstanciasPeregrinos(fechaInicio, fechaFin, parada);
-		} while (continuarExportando);
+		} while (continuarExportando );
 	}
 
 	/**
@@ -681,14 +698,8 @@ public class ControladorPrincipal {
 
 		// InputField para la inserción del ID
 		JPanel buttonPanel = new JPanel(new BorderLayout(5, 5));
-		// buttonPanel.add(new JLabel("¿Deseas exportar las estancias?"),
-		// BorderLayout.WEST);
-		JButton exportButton = new JButton("Exportar en XML");
-//		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-//		JLabel labelOpciones = new JLabel("¿Deseas introducir otras fechas?");
-//		labelPanel.add(labelOpciones);
-//		buttonPanel.add(labelPanel, BorderLayout.SOUTH);
-	 
+
+		JButton exportButton = new JButton("Exportar en XML");	 
 
 		exportButton.addActionListener(e -> {
 			try {
