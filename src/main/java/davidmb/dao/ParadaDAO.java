@@ -9,18 +9,37 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 import davidmb.models.Carnet;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
-import davidmb.utils.MyLogger;
 
+/**
+ * DAO (Data Access Object) para gestionar las operaciones relacionadas con las
+ * paradas.
+ * 
+ * <p>
+ * Esta clase proporciona métodos para insertar y obtener paradas en la base de
+ * datos.
+ * </p>
+ */
 public class ParadaDAO {
 
 	ConexionDB con = ConexionDB.getInstancia();
-	Logger logger = Logger.getLogger(ParadaDAO.class.getName());
 
+	/**
+	 * Inserta una nueva parada en la base de datos.
+	 * 
+	 * <p>
+	 * Este método inserta una parada en la base de datos y devuelve el ID de la
+	 * parada insertada.
+	 * </p>
+	 * 
+	 * @param parada la parada que se desea insertar.
+	 * @return un {@link Optional} que contiene el ID de la parada insertada si la
+	 *         operación es exitosa, o un {@link Optional} vacío si la inserción
+	 *         falla.
+	 */
 	public Optional<Long> insertarParada(Parada parada) {
 		String sqlParadas = "INSERT INTO Paradas (nombre, region, responsable, id_usuario) VALUES (?, ?, ?, ?)";
 
@@ -37,27 +56,38 @@ public class ParadaDAO {
 				paradaStmt.setLong(4, parada.getIdUsuario());
 
 				paradaStmt.executeUpdate();
-				logger.info("Parada insertada correctamente");
+
 				connection.commit();
 				return Optional.of(parada.getIdUsuario());
 
 			} catch (SQLException e) {
-				logger.severe("Error al insertar parada: " + e.getMessage());
+
 				try {
 					connection.rollback();
-					logger.warning("Transacción revertida.");
+
 				} catch (SQLException rollbackEx) {
-					logger.severe("Error al hacer rollback: " + rollbackEx.getMessage());
+					rollbackEx.printStackTrace();
 				}
 			} finally {
 				connection.setAutoCommit(true);
 			}
 		} catch (SQLException e) {
-			logger.severe("Error al insertar parada: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return Optional.empty();
 	}
 
+	/**
+	 * Obtiene una parada de la base de datos por su ID.
+	 * 
+	 * <p>
+	 * Este método obtiene una parada de la base de datos por su ID.
+	 * </p>
+	 * 
+	 * @param id el ID de la parada que se desea obtener.
+	 * @return un {@link Optional} que contiene la parada si existe, o un
+	 *         {@link Optional} vacío si no existe.
+	 */
 	public Optional<Parada> obtenerParadaPorId(Long id) {
 		String sql = "SELECT * FROM Paradas WHERE id = ?";
 		Parada parada = null;
@@ -72,13 +102,24 @@ public class ParadaDAO {
 					parada.setResponsable(rs.getString("responsable"));
 				}
 			}
-			logger.info("Parada recuperada correctamente");
+
 		} catch (SQLException ex) {
-			logger.severe("Error al recuperar la parada: " + ex.getMessage());
+			ex.printStackTrace();
 		}
 		return Optional.ofNullable(parada);
 	}
 
+	/**
+	 * Obtiene una parada de la base de datos por el ID de su usuario.
+	 * 
+	 * <p>
+	 * Este método obtiene una parada de la base de datos por el ID de su usuario.
+	 * </p>
+	 * 
+	 * @param id el ID del usuario asociado a la parada que se desea obtener.
+	 * @return un {@link Optional} que contiene la parada si existe, o un
+	 *         {@link Optional} vacío si no existe.
+	 */
 	public Optional<Parada> obtenerParadaPorIdUsuario(Long id) {
 		String paradaSql = "SELECT * FROM Paradas WHERE id_usuario = ?";
 
@@ -96,14 +137,23 @@ public class ParadaDAO {
 					parada.setResponsable(rs.getString("responsable"));
 				}
 			}
-			logger.info("Parada recuperada correctamente");
 
 		} catch (SQLException e) {
-			logger.severe("Error al obtener parada por id de usuario: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return Optional.ofNullable(parada);
 	}
 
+	/**
+	 * Obtiene una lista de paradas asociadas a un peregrino según su ID.
+	 * 
+	 * <p>
+	 * Este método obtiene las paradas asociadas al ID de un peregrino específico.
+	 * </p>
+	 * 
+	 * @param id el ID del peregrino cuyas paradas se desean obtener.
+	 * @return una lista de paradas asociadas al peregrino.
+	 */
 	public List<Parada> obtenerParadasPorIdPeregrino(Long idPeregrino) {
 		String sql = "SELECT * \r\n" + "FROM Peregrinos_paradas \r\n"
 				+ "INNER JOIN Paradas ON Peregrinos_paradas.id_parada = Paradas.id\r\n"
@@ -122,13 +172,27 @@ public class ParadaDAO {
 					paradas.add(parada);
 				}
 			}
-			logger.info("Paradas obtenidas correctamente");
+
 		} catch (SQLException e) {
-			logger.severe("Error al obtener paradas por id de peregrino: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return paradas;
 	}
 
+	/**
+	 * Inserta una relación entre un peregrino y una parada en la base de datos.
+	 * 
+	 * <p>
+	 * Este método inserta una relación entre un peregrino y una parada en la base
+	 * de datos y devuelve el ID del peregrino insertado.
+	 * </p>
+	 * 
+	 * @param idPeregrino el ID del peregrino.
+	 * @param idParada    el ID de la parada.
+	 * @param fecha       la fecha en la que el peregrino visitó la parada.
+	 * @return un {@link Optional} que contiene el ID del peregrino si la operación
+	 *         es exitosa, o un {@link Optional} vacío si la inserción falla.
+	 */
 	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada, LocalDate fecha) {
 		String sql = "INSERT INTO Peregrinos_paradas (id_peregrino, id_parada, fecha) VALUES (?, ?, ?)";
 		try (Connection connection = con.getConexion();) {
@@ -139,29 +203,41 @@ public class ParadaDAO {
 				stmt.setDate(3, Date.valueOf(fecha));
 				int rowsAffected = stmt.executeUpdate();
 				if (rowsAffected > 0) {
-					logger.info("Peregrino_parada insertado correctamente");
+
 					return Optional.of(idPeregrino);
 				}
 			} catch (SQLException e) {
-				logger.severe("Error al insertar peregrinos_paradas: " + e.getMessage());
+
 				try {
 					connection.rollback();
-					logger.warning("Transacción revertida.");
+
 				} catch (SQLException rollbackEx) {
-					logger.severe("Error al hacer rollback: " + rollbackEx.getMessage());
+					rollbackEx.printStackTrace();
 				}
 			} finally {
 				connection.setAutoCommit(true);
 			}
 		} catch (SQLException e) {
-			logger.severe("Error al insertar peregrinos_paradas: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return Optional.empty();
 	}
 
+	/**
+	 * Obtiene una parada de la base de datos por su nombre.
+	 * 
+	 * <p>
+	 * Este método obtiene una parada de la base de datos por su nombre.
+	 * </p>
+	 * 
+	 * @param nombre el nombre de la parada que se desea obtener.
+	 * @return un {@link Optional} que contiene la parada si existe, o un
+	 *         {@link Optional} vacío si no existe
+	 * 
+	 */
 	public Optional<Parada> obtenerParadaPorNombre(String nombre) {
 		String paradaSql = "SELECT * FROM Paradas WHERE nombre = ?";
-		System.out.println("Parada" + nombre);
+
 		Parada parada = null;
 
 		try (Connection connection = con.getConexion();
@@ -177,14 +253,23 @@ public class ParadaDAO {
 
 				}
 			}
-			logger.info("Parada recuperada correctamente");
 
 		} catch (SQLException e) {
-			logger.severe("Error al obtener parada por id de usuario: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return Optional.ofNullable(parada);
 	}
 
+	/**
+	 * Obtiene una lista de peregrinos asociados a una parada según su ID.
+	 * 
+	 * <p>
+	 * Este método obtiene los peregrinos asociados al ID de una parada específica.
+	 * </p>
+	 * 
+	 * @param idParada el ID de la parada cuyos peregrinos se desean obtener.
+	 * @return una lista de peregrinos asociados a la parada.
+	 */
 	public List<Peregrino> obtenerPeregrinosParada(Long idParada) {
 
 		String sql = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_usuario, "
@@ -270,14 +355,24 @@ public class ParadaDAO {
 					peregrinos.add(peregrino);
 				}
 			}
-			logger.info("Peregrinos obtenidos correctamente");
+
 		} catch (SQLException e) {
-			logger.severe("Error al obtener peregrinos de la parada: " + e.getMessage());
+			e.printStackTrace();
 		}
 
 		return peregrinos;
 	}
 
+	/**
+	 * Obtiene una lista de todas las paradas de la base de datos.
+	 * 
+	 * <p>
+	 * Este método obtiene una lista de todas las paradas de la base de datos.
+	 * </p>
+	 * 
+	 * @return una lista de todas las paradas de la base de datos
+	 * 
+	 */
 	public List<Parada> obtenerTodasParadas() {
 		String sql = "SELECT * FROM Paradas";
 		String sqlPeregrinosParadas = "SELECT id_peregrino FROM Peregrinos_paradas WHERE id_parada = ?";
@@ -311,29 +406,48 @@ public class ParadaDAO {
 
 				paradas.add(parada);
 			}
-			logger.info("Paradas obtenidas correctamente");
 
 		} catch (SQLException e) {
-			logger.severe("Error al obtener todas las paradas: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return paradas;
 	}
 
-	public boolean paradaExiste(String nombre) {
+	/**
+	 * Actualiza una parada en la base de datos.
+	 * 
+	 * <p>
+	 * Este método actualiza una parada en la base de datos y devuelve el ID de la
+	 * parada actualizada.
+	 * </p>
+	 * 
+	 * @param parada la parada que se desea actualizar.
+	 * @return un {@link Optional} que contiene el ID de la parada actualizada si la
+	 *         operación es exitosa, o un {@link Optional} vacío si la actualización
+	 *         falla.
+	 */
+	public boolean paradaExiste(String nombre, String region, boolean esAdmin) {
 		boolean existe = false;
-		String sql = "SELECT * FROM Paradas WHERE nombre = ?";
-
+		String sql = "";
+		if (esAdmin) {
+			sql = "SELECT * FROM Paradas WHERE nombre = ? AND region = ?";
+		} else {
+			sql = "SELECT * FROM Paradas WHERE nombre = ?";
+		}
 		try (Connection connection = con.getConexion(); PreparedStatement stmt = connection.prepareStatement(sql)) {
 			stmt.setString(1, nombre);
+			if (esAdmin) {
+				stmt.setString(2, region);
+			}
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
 					existe = true;
-					logger.info("Parada encontrada correctamente");
+
 				}
 			}
 
 		} catch (SQLException e) {
-			logger.severe("Error al buscar parada: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return existe;
 	}

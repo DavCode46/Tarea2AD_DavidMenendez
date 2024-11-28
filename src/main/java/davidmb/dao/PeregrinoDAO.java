@@ -7,22 +7,43 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
+
 
 import davidmb.models.Carnet;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
-import davidmb.models.Usuario;
 
+
+/**
+ * DAO (Data Access Object) para gestionar las operaciones relacionadas con los
+ * peregrinos.
+ * 
+ * <p>
+ * Esta clase proporciona métodos para insertar y obtener peregrinos en la base de
+ * datos.
+ * </p>
+ */
 public class PeregrinoDAO {
 
 	ConexionDB con = ConexionDB.getInstancia();
-	private static final Logger logger = Logger.getLogger(PeregrinoDAO.class.getName());
+	
 
+	
+	/**
+	 * Inserta un nuevo peregrino en la base de datos.
+	 * 
+	 * <p>
+	 * Este método inserta un peregrino en la base de datos y devuelve el ID del peregrino insertado.
+	 * </p>
+	 * 
+	 * @param peregrino el peregrino que se desea insertar.
+	 * @return un {@link Optional} que contiene el ID del peregrino insertado si la
+	 *         operación es exitosa, o un {@link Optional} vacío si la inserción
+	 *         falla.
+	 */
 	public Optional<Long> insertarPeregrino(Peregrino peregrino) {
-		// Consultas SQL
+		
 		String sqlPeregrino = "INSERT INTO Peregrinos (nombre, nacionalidad, id_carnet, id_usuario) VALUES (?, ?, ?, ?)";
-		System.out.println(peregrino);
 
 		try (Connection connection = con.getConexion();) {
 			connection.setAutoCommit(false);
@@ -35,26 +56,40 @@ public class PeregrinoDAO {
 				peregrinostmt.setLong(4, peregrino.getIdUsuario());
 
 				peregrinostmt.executeUpdate();
-				logger.info("Peregrino insertado: " + peregrino);
+			
 				connection.commit();
 				return Optional.of(peregrino.getIdUsuario());
 			} catch (SQLException e) {
-				logger.severe("Error al insertar peregrino: " + e.getMessage());
+				e.printStackTrace();
 				try {
 					connection.rollback();
-					logger.warning("Transacción revertida.");
+					
 				} catch (SQLException rollbackEx) {
-					logger.severe("Error al hacer rollback: " + rollbackEx.getMessage());
+				rollbackEx.printStackTrace();
 				}
 			} finally {
 				connection.setAutoCommit(true);
 			}
 		} catch (SQLException e) {
-			logger.severe("Error al insertar peregrino: " + e.getMessage());
+			e.printStackTrace();
 		} 
 		return Optional.empty();
 	}
 
+	/**
+	 * Obtiene un peregrino por su ID.
+	 * 
+	 * <p>
+	 * Este método obtiene un peregrino de la base de datos por su ID y devuelve un
+	 * {@link Optional} que contiene el peregrino si es encontrado, o un
+	 * {@link Optional} vacío si no se encuentra.
+	 * </p>
+	 * 
+	 * @param id el ID del peregrino que se desea obtener.
+	 * @return un {@link Optional} que contiene el peregrino si es encontrado, o un
+	 *         {@link Optional} vacío si no se encuentra.
+	 * 
+	 */
 	public Optional<Peregrino> obtenerPeregrinoPorId(Long id) {
 		String sqlPeregrino = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_carnet, p.id_usuario, "
 				+ "c.id AS carnet_id, c.parada_inicial, c.fechaexp, c.distancia, c.nvips, "
@@ -126,15 +161,30 @@ public class PeregrinoDAO {
 			// Asignar las estancias y paradas al peregrino
 			peregrino.setEstancias(estancias);
 			peregrino.setParadas(paradas);
-			logger.info("Peregrino obtenido: " + peregrino);
+			
 
 		} catch (SQLException e) {
-			logger.severe("Error al obtener peregrino: " + e.getMessage());
+			e.printStackTrace();
 		}
 
 		return Optional.ofNullable(peregrino);
 	}
 
+	
+	/**
+	 * Obtiene un peregrino por su ID de usuario.
+	 * 
+	 * <p>
+	 * Este método obtiene un peregrino de la base de datos por su ID de usuario y
+	 * devuelve un {@link Optional} que contiene el peregrino si es encontrado, o un
+	 * {@link Optional} vacío si no se encuentra.
+	 * </p>
+	 * 
+	 * @param id el ID de usuario del peregrino que se desea obtener.
+	 * @return un {@link Optional} que contiene el peregrino si es encontrado, o un
+	 *         {@link Optional} vacío si no se encuentra.
+	 * 
+	 */
 	public Optional<Peregrino> obtenerPeregrinoPorIdUsuario(Long id) {
 		String sqlPeregrino = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_carnet, p.id_usuario, "
 				+ "c.id AS carnet_id, c.parada_inicial, c.fechaexp, c.distancia, c.nvips, "
@@ -209,17 +259,27 @@ public class PeregrinoDAO {
 				// Asignar las estancias y paradas al peregrino
 				peregrino.setEstancias(estancias);
 				peregrino.setParadas(paradas);
-				logger.info("Peregrino obtenido con éxito");
+			
 			}
 
 		} catch (SQLException e) {
-			logger.severe("Error al obtener peregrino: " + e.getMessage());
+			e.printStackTrace();
 
 		}
 
 		return Optional.ofNullable(peregrino);
 	}
 
+	/**
+	 * Obtiene todos los peregrinos de la base de datos.
+	 * 
+	 * <p>
+	 * Este método obtiene todos los peregrinos de la base de datos y devuelve una
+	 * lista con los peregrinos encontrados.
+	 * </p>
+	 * 
+	 * @return una lista con los peregrinos encontrados.
+	 */
 	public List<Peregrino> obtenerTodosPeregrinos() {
 		String sqlPeregrino = "SELECT p.id AS peregrino_id, p.nombre, p.nacionalidad, p.id_carnet, p.id_usuario, "
 				+ "c.id AS carnet_id, c.parada_inicial, c.fechaexp, c.distancia, c.nvips, "
@@ -293,39 +353,62 @@ public class PeregrinoDAO {
 				peregrinos.add(peregrino);
 
 			}
-			logger.info("Peregrinos obtenidos");
+			
 		} catch (SQLException e) {
-			logger.severe("Error al obtener peregrinos: " + e.getMessage());
+			e.printStackTrace();
 		}
 
 		return peregrinos;
 	}
 
+	
+	/**
+	 * Comprueba si un peregrino existe en la base de datos.
+	 * 
+	 * <p>
+	 * Este método comprueba si un peregrino existe en la base de datos por su
+	 * id y devuelve un valor booleano que indica si el peregrino existe o no.
+	 * </p>
+	 * 
+	 * @param id el id del peregrino que se desea comprobar.
+	 * @return un valor booleano que indica si el peregrino existe o no.
+	 */
 	public boolean peregrinoExiste(Long id) {
 		String sql = "SELECT * FROM Peregrinos WHERE id = ?";
 		try (Connection connection = con.getConexion(); PreparedStatement stmt = connection.prepareStatement(sql)) {
 			stmt.setLong(1, id);
 			try (ResultSet rs = stmt.executeQuery()) {
-				logger.info("Peregrino existe");
+				
 				return rs.next();
 			}
 
 		} catch (SQLException e) {
-			logger.severe("Error al comprobar si el peregrino existe: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return false;
 	}
 
+	/**
+	 * Comprueba si un peregrino existe en la base de datos.
+	 * 
+	 * <p>
+	 * Este método comprueba si un peregrino existe en la base de datos por su
+	 * nombre y devuelve un valor booleano que indica si el peregrino existe o no.
+	 * </p>
+	 * 
+	 * @param nombre el nombre del peregrino que se desea comprobar.
+	 * @return un valor booleano que indica si el peregrino existe o no.
+	 */
 	public boolean nombrePeregrinoExiste(String nombre) {
 		String sql = "SELECT * FROM Peregrinos WHERE nombre = ?";
 		try (Connection connection = con.getConexion(); PreparedStatement stmt = connection.prepareStatement(sql)) {
 			stmt.setString(1, nombre);
 			try (ResultSet rs = stmt.executeQuery()) {
-				logger.info("Nombre de peregrino existe");
+				
 				return rs.next();
 			}
 		} catch (SQLException e) {
-			logger.severe("Error al comprobar si el nombre de peregrino existe: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return false;
 	}

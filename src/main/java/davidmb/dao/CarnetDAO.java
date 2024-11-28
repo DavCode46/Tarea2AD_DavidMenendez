@@ -6,16 +6,29 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import davidmb.models.Carnet;
 
+/**
+ * DAO (Data Access Object) para gestionar las operaciones relacionadas con los carnets.
+ * 
+ * <p>Esta clase proporciona métodos para insertar y modificar carnets en la base de datos.</p>
+ */
 public class CarnetDAO {
 
-	private static final Logger logger = Logger.getLogger(CarnetDAO.class.getName());
 	ConexionDB con = ConexionDB.getInstancia();
 
+
+    /**
+     * Inserta un nuevo carnet en la base de datos.
+     * 
+     * <p>Este método inserta un carnet con la parada inicial proporcionada en la base de datos
+     * y devuelve el ID del carnet insertado.</p>
+     * 
+     * @param carnet el carnet que se desea insertar.
+     * @return un {@link Optional} que contiene el ID del carnet insertado si la operación es exitosa,
+     *         o un {@link Optional} vacío si la inserción falla.
+     */
 	public Optional<Long> insertarCarnet(Carnet carnet) {
 
 		String sql = "INSERT INTO Carnets (parada_inicial) VALUES (?)";
@@ -38,28 +51,36 @@ public class CarnetDAO {
 							carnet.setId(rs.getLong(1));
 						}
 					}
-					logger.log(Level.INFO, "Carnet insertado: " + carnet);
+
 					connection.commit();
 					return Optional.of(carnet.getId());
 				}
 			} catch (IllegalArgumentException | SQLException e) {
-				logger.severe("Error al insertar carnet: " + e.getMessage());
+
 				try {
 					connection.rollback();
-					logger.warning("Transacción revertida.");
+
 				} catch (SQLException rollbackEx) {
-					logger.severe("Error al hacer rollback: " + rollbackEx.getMessage());
+					rollbackEx.printStackTrace();
 				}
 			} finally {
 				connection.setAutoCommit(true);
 			}
 
 		} catch (SQLException e) {
-			logger.severe("Error de conexión o rollback al insertar carnet: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return Optional.empty();
 	}
 
+	/**
+     * Modifica un carnet existente en la base de datos.
+     * 
+     * <p>Este método actualiza la distancia y el número de vips del carnet con el ID especificado.</p>
+     * 
+     * @param carnet el carnet con los datos actualizados.
+     * @return {@code true} si la actualización fue exitosa, {@code false} si no se pudo realizar la actualización.
+     */
 	public boolean modificarCarnet(Carnet carnet) {
 		String sqlCarnet = "UPDATE Carnets SET distancia = ?, nvips = ? WHERE id = ?";
 		boolean ret = false;
@@ -76,14 +97,14 @@ public class CarnetDAO {
 				int rowsAffected = carnetStmt.executeUpdate();
 				if (rowsAffected > 0) {
 					ret = true;
-					logger.info("Carnet modificado: " + carnet);
+
 					connection.commit();
 				} else {
-					logger.info("No se ha modificado el carnet: " + carnet);
+
 					connection.rollback();
 				}
 			} catch (SQLException e) {
-				logger.severe("Error al modificar carnet: " + e.getMessage());
+				e.printStackTrace();
 				connection.rollback();
 				throw e;
 			} finally {
@@ -91,7 +112,7 @@ public class CarnetDAO {
 			}
 
 		} catch (SQLException e) {
-			logger.severe("Error de conexión o rollback al modificar carnet: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return ret;
 	}

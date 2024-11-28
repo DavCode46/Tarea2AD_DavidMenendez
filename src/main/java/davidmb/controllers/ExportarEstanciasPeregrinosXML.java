@@ -21,23 +21,33 @@ import davidmb.models.Estancia;
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
 
+
+/**
+ * Clase encargada de la exportación de las estancias de los peregrinos a un archivo XML.
+ * 
+ * <p>Esta clase permite exportar las estancias asociadas a una parada específica dentro de un rango de fechas
+ * dado, generando un archivo XML con la información relevante sobre las estancias y los peregrinos.</p>
+ */
 public class ExportarEstanciasPeregrinosXML {
-	/**
-	 * CU3: Exportar datos Parada: el responsable de una parada podrá exportar los
-	 * datos de las estancias de los peregrinos de su parada, en un rango de fechas
-	 * concreto. Se reflejarán los datos de la parada (id, nombre, región), el rango
-	 * de fechas seleccionado y posteriormente la lista de las estancias de los
-	 * peregrinos en ese periodo, indicando el id de la estancia, el nombre del
-	 * peregrino, la fecha en que se realizó y si fue de tipo VIP o no.
-	 */
+	
 	private LocalDate fechaInicio;
 	private LocalDate fechaFin;
 	private Parada parada;
 
+	  /**
+     * Constructor por defecto.
+     */
 	public ExportarEstanciasPeregrinosXML() {
 		super();
 	}
 
+	/**
+     * Constructor que inicializa la exportación con los parámetros de fecha y parada específicos.
+     * 
+     * @param fechaInicio la fecha de inicio del rango de exportación.
+     * @param fechaFin la fecha de fin del rango de exportación.
+     * @param parada la parada cuyas estancias se desean exportar.
+     */
 	public ExportarEstanciasPeregrinosXML(LocalDate fechaInicio, LocalDate fechaFin, Parada parada) {
 		super();
 		this.fechaInicio = fechaInicio;
@@ -45,6 +55,22 @@ public class ExportarEstanciasPeregrinosXML {
 		this.parada = parada;
 	}
 
+	/**
+     * Exporta las estancias de los peregrinos asociadas a una parada en el rango de fechas especificado a un archivo XML.
+     * 
+     * <p>Este método obtiene las estancias de la parada en el rango de fechas proporcionado, luego construye un
+     * archivo XML con la siguiente estructura:
+     * <ul>
+     *   <li>ID de la parada</li>
+     *   <li>Nombre de la parada</li>
+     *   <li>Región de la parada</li>
+     *   <li>Fechas de inicio y fin</li>
+     *   <li>Información de cada estancia</li>
+     * </ul>
+     * Cada estancia incluye el ID, el nombre del peregrino, la fecha y si fue una estancia VIP.</p>
+     * 
+     * @throws Exception si ocurre un error durante el proceso de exportación, como problemas al generar el XML o al obtener datos.
+     */
 	public void exportarEstancias() throws Exception {
 		ControladorPrincipal sistema = new ControladorPrincipal();
 		List<Estancia> estanciasParada = sistema.obtenerEstanciasPorIdParada(parada.getId());

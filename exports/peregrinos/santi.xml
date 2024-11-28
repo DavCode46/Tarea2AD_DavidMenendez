@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <carnet>
-    <id>13</id>
-    <fechaexp>2024-11-23</fechaexp>
+    <id>9</id>
+    <fechaexp>2024-11-29</fechaexp>
     <expedidoen>Santiago</expedidoen>
     <peregrino>
         <nombre>santi</nombre>
-        <nacionalidad>italia</nacionalidad>
+        <nacionalidad>jamaica</nacionalidad>
     </peregrino>
-    <hoy>2024-11-23</hoy>
+    <hoy>2024-11-29</hoy>
     <distanciatotal>0,0</distanciatotal>
     <paradas/>
     <estancias/>

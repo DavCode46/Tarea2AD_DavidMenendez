@@ -9,16 +9,35 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
-import javax.swing.JOptionPane;
 
 import davidmb.models.Estancia;
 
+/**
+ * DAO (Data Access Object) para gestionar las operaciones relacionadas con las
+ * estancias.
+ * 
+ * <p>
+ * Esta clase proporciona métodos para insertar y obtener estancias en la base
+ * de datos.
+ * </p>
+ */
 public class EstanciaDAO {
 	ConexionDB con = ConexionDB.getInstancia();
-	Logger logger = Logger.getLogger(EstanciaDAO.class.getName());
-
+	
+	/**
+	 * Inserta una nueva estancia en la base de datos.
+	 * 
+	 * <p>
+	 * Este método inserta una estancia en la base de datos y devuelve el ID de la
+	 * estancia insertada.
+	 * </p>
+	 * 
+	 * @param estancia la estancia que se desea insertar.
+	 * @return un {@link Optional} que contiene el ID de la estancia insertada si la
+	 *         operación es exitosa, o un {@link Optional} vacío si la inserción
+	 *         falla.
+	 */
 	public Optional<Long> insertarEstancia(Estancia estancia) {
 	    String sqlEstancias = "INSERT INTO Estancias (id_peregrino, id_parada, fecha, vip) VALUES (?, ?, ?, ?)";
 
@@ -41,30 +60,40 @@ public class EstanciaDAO {
 	                    }
 	                }
 	                connection.commit(); 
-	                logger.info("Estancia insertada correctamente: " + estancia);
+	              
 	                return Optional.of(estancia.getId());
 	            } else {
-	                logger.warning("No se afectaron filas al insertar la estancia. Haciendo rollback.");
+	                
 	                connection.rollback(); 
 	            }
 	        } catch (SQLException e) {
-	            logger.severe("Error al insertar estancia: " + e.getMessage());
+	          
 	            try {
 	                connection.rollback(); 
-	                logger.warning("Transacción revertida.");
+	                
 	            } catch (SQLException rollbackEx) {
-	                logger.severe("Error al hacer rollback: " + rollbackEx.getMessage());
+	               rollbackEx.printStackTrace();
 	            }
 	        } finally {
 	        	connection.setAutoCommit(true);
 	        }
 	    } catch (SQLException e) {
-	        logger.severe("Error al establecer la conexión o manejar la transacción: " + e.getMessage());
+	       e.printStackTrace();
 	    }
 
 	    return Optional.empty(); 
 	}
 
+	/**
+	 * Obtiene una lista de estancias asociadas a un peregrino según su ID.
+	 * 
+	 * <p>
+	 * Este método obtiene las estancias asociadas al ID de un peregrino específico.
+	 * </p>
+	 * 
+	 * @param id el ID del peregrino cuyas estancias se desean obtener.
+	 * @return una lista de estancias asociadas al peregrino.
+	 */
 	public List<Estancia> obtenerEstanciasPorIdPeregrino(Long id) {
 		String sql = "SELECT * FROM Estancias WHERE id_peregrino = ?";
 		List<Estancia> estancias = new ArrayList<>();
@@ -84,15 +113,25 @@ public class EstanciaDAO {
 					estancias.add(estancia);
 				}
 			}
-			logger.info("Estancias obtenidas correctamente");
+			
 
 		} catch (SQLException ex) {
-			logger.severe("Error al obtener la estancia del peregrino");
+			ex.printStackTrace();
 		}
 
 		return estancias;
 	}
 
+	/**
+	 * Obtiene una lista de estancias asociadas a una parada según su ID.
+	 * 
+	 * <p>
+	 * Este método obtiene las estancias asociadas al ID de una parada específica.
+	 * </p>
+	 * 
+	 * @param id el ID de la parada cuyas estancias se desean obtener.
+	 * @return una lista de estancias asociadas a la parada.
+	 */
 	public List<Estancia> obtenerEstanciasPorIdParada(Long id) {
 		String sql = "SELECT * FROM Estancias WHERE id_parada = ?";
 		List<Estancia> estancias = new ArrayList<>();
@@ -112,10 +151,10 @@ public class EstanciaDAO {
 					estancias.add(estancia);
 				}
 			}
-			logger.info("Estancias obtenidas correctamente");
+			
 
 		} catch (SQLException ex) {
-			logger.severe("Error al obtener la estancia del peregrino");
+			ex.printStackTrace();
 		}
 
 		return estancias;

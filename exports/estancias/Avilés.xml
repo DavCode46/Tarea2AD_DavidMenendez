@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<parada>
+    <id>3</id>
+    <parada>Avilés</parada>
+    <region>N</region>
+    <fecha-inicio>2020-11-11</fecha-inicio>
+    <fecha-fin>2025-11-11</fecha-fin>
+    <estancias>
+        <estancia>
+            <id>3</id>
+            <peregrino>Juan Pérez</peregrino>
+            <fecha>2024-01-04</fecha>
+            <vip>Sí</vip>
+        </estancia>
+        <estancia>
+            <id>10</id>
+            <peregrino>samanta</peregrino>
+            <fecha>2024-11-29</fecha>
+            <vip>Sí</vip>
+        </estancia>
+        <estancia>
+            <id>11</id>
+            <peregrino>Juan Pérez</peregrino>
+            <fecha>2024-11-29</fecha>
+            <vip>Sí</vip>
+        </estancia>
+        <estancia>
+            <id>12</id>
+            <peregrino>Laura García</peregrino>
+            <fecha>2024-11-29</fecha>
+            <vip>Sí</vip>
+        </estancia>
+        <estancia>
+            <id>13</id>
+            <peregrino>Carlos Fernández</peregrino>
+            <fecha>2024-11-29</fecha>
+            <vip>Sí</vip>
+        </estancia>
+        <estancia>
+            <id>14</id>
+            <peregrino>David</peregrino>
+            <fecha>2024-11-29</fecha>
+            <vip>No</vip>
+        </estancia>
+        <estancia>
+            <id>15</id>
+            <peregrino>David</peregrino>
+            <fecha>2024-11-29</fecha>
+            <vip>No</vip>
+        </estancia>
+        <estancia>
+            <id>16</id>
+            <peregrino>diego</peregrino>
+            <fecha>2024-11-29</fecha>
+            <vip>Sí</vip>
+        </estancia>
+    </estancias>
+</parada>

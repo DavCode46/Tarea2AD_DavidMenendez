@@ -61,83 +61,155 @@ public class ControladorPrincipal {
 		this.controladorPrincipal = controladorPrincipal;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////
+	//////                    SECCIÓN PEREGRINOS                             //////                                                    
+	//////                                                                   //////
+	///////////////////////////////////////////////////////////////////////////////
+	
 	/**
-	 * Obtiene el ID asociado a un nombre de usuario.
-	 * 
-	 * @param nombreUsuario Nombre de usuario.
-	 * @return ID del usuario o null si no existe.
+	 * Obtiene un peregrino basado en su ID de usuario.
+	 *
+	 * @param id el ID del usuario asociado al peregrino.
+	 * @return un {@code Optional} que contiene el peregrino si se encuentra, o vacío si no existe.
 	 */
-//	public Long getId(String nombreUsuario) {
-//		Sesion u = credenciales.get(nombreUsuario);
-//
-//		return (u != null) ? u.getId() : null;
-//	}
-
-	public boolean validarCredenciales(String nombre, String contrasenia) {
-		UsuariosController uc = new UsuariosController();
-		return uc.validarCredenciales(nombre, contrasenia);
-	}
-
-	public Optional<Usuario> login(String nombre, String contrasenia) {
-		UsuariosController uc = new UsuariosController();
-		return uc.login(nombre, contrasenia);
-	}
-
-	public Optional<Long> insertarUsuario(Usuario u) {
-		UsuariosController uc = new UsuariosController();
-		return uc.insertarUsuario(u);
-	}
-
 	public Optional<Peregrino> obtenerPeregrinoPorIdUsuario(Long id) {
 		PeregrinosController pec = new PeregrinosController();
 		return pec.obtenerPeregrinoPorIdUsuario(id);
 	}
 
+	/**
+	 * Obtiene un peregrino basado en su ID único.
+	 *
+	 * @param id el ID único del peregrino.
+	 * @return un {@code Optional} que contiene el peregrino si se encuentra, o vacío si no existe.
+	 */
 	public Optional<Peregrino> obtenerPeregrinoPorId(Long id) {
 		PeregrinosController pec = new PeregrinosController();
 		return pec.obtenerPeregrinoPorId(id);
 	}
-
-	public Optional<Parada> obtenerParadaPorIdUsuario(Long id) {
+	
+	/**
+	 * Verifica si un peregrino existe en el sistema basado en su ID.
+	 *
+	 * @param id el ID único del peregrino.
+	 * @return {@code true} si el peregrino existe, o {@code false} si no existe.
+	 */
+	public boolean peregrinoExiste(Long id) {
+		PeregrinosController pc = new PeregrinosController();
+		return pc.peregrinoExiste(id);
+	}
+	
+	/**
+	 * Registra un nuevo peregrino en el sistema solicitando los datos necesarios al usuario.
+	 *
+	 * @return el objeto {@code Peregrino} registrado si la operación tiene éxito,
+	 *         o {@code null} si se cancela o hay errores en el proceso.
+	 */
+	public Peregrino registrarPeregrino() {
 		ParadasController pc = new ParadasController();
-		return pc.obtenerParadaPorIdUsuario(id);
-	}
+		PeregrinosController pec = new PeregrinosController();
+		CarnetsController cc = new CarnetsController();
+		Peregrino nuevoPeregrino = null;
+		Carnet carnet = null;
+		String nombre;
+		String nombreUsuario;
+		do {
+			JOptionPane.showMessageDialog(null, "Formulario de registro de nuevo peregrino");
 
-	public List<Parada> obtenerParadasPorIdPeregrino(Long idPeregrino) {
-		ParadasController pc = new ParadasController();
-		return pc.obtenerParadasPorIdPeregrino(idPeregrino);
-	}
+			// Obtener datos del usuario
+			nombre = obtenerEntrada("Ingrese su nombre", "Nombre", false, false);
+			if (nombre == null)
+				return null;
 
-	public List<Estancia> obtenerEstanciasPorIdPeregrino(Long idPeregrino) {
-		EstanciasController ec = new EstanciasController();
-		return ec.obtenerEstanciasPorIdPeregrino(idPeregrino);
-	}
+			nombreUsuario = obtenerEntrada("Ingrese su nombre de usuario", "Nombre de usuario", false, true);
+			if (nombreUsuario == null)
+				return null;
 
-	public List<Estancia> obtenerEstanciasPorIdParada(Long idParada) {
-		EstanciasController ec = new EstanciasController();
-		return ec.obtenerEstanciasPorIdParada(idParada);
-	}
+			String contrasenia = obtenerEntrada("Ingrese su contraseña", "Contraseña", false, true);
+			if (contrasenia == null)
+				return null;
 
-	public Optional<Parada> obtenerParadaPorId(Long id) {
-		ParadasController pc = new ParadasController();
-		return pc.obtenerParadaPorId(id);
-	}
+			String nacionalidad = "";
+			do {
+				nacionalidad = mostrarPaises();
+				if (!validarPais(nacionalidad)) {
+					JOptionPane.showMessageDialog(null, "El país ingresado no es válido.");
+				}
+			} while (!validarPais(nacionalidad));
 
+			String parada = "";
+			do {
+				parada = obtenerEntrada(mostrarParadas(true), "Parada", false, false);
+				if (!pc.paradaExiste(parada, null, false)) {
+					JOptionPane.showMessageDialog(null, "La parada seleccionada no es válida.");
+				}
+			} while (!pc.paradaExiste(parada, null, false));
+
+			// Confirmar los datos
+			nuevoPeregrino = confirmarDatos(nombre, nombreUsuario, contrasenia, nacionalidad, parada);
+
+			do {
+				if (nuevoPeregrino == null) {
+					// Si la confirmación falla, pedir nuevos datos
+
+					nuevoPeregrino = obtenerDatosModificados(nombre, nombreUsuario, contrasenia, nacionalidad, parada);
+
+				}
+			} while (nuevoPeregrino == null);
+				Optional<Parada> paradaEncontradaOptional = pc.obtenerParadaPorNombre(parada);
+
+				Parada paradaEncontrada = null;
+				if (paradaEncontradaOptional.isPresent()) {
+					paradaEncontrada = paradaEncontradaOptional.get();
+				}
+				carnet = new Carnet(paradaEncontrada);
+				paradaEncontrada.getPeregrinos().add(nuevoPeregrino.getId());
+				Optional<Long> idCarnetOptional = cc.insertarCarnet(carnet);
+
+				if (idCarnetOptional.isPresent()) {
+					JOptionPane.showMessageDialog(null, "Carnet creado correctamente");
+					nuevoPeregrino.getCarnet().setId(idCarnetOptional.get());
+				} else {
+					JOptionPane.showMessageDialog(null, "Error al insertar el carnet");
+				}
+				Optional<Long> idPeregrinoOptional = pec.insertarPeregrino(nuevoPeregrino);
+
+				if (idPeregrinoOptional.isPresent()) {
+					JOptionPane.showMessageDialog(null, "Peregrino insertado correctamente");
+					nuevoPeregrino.setId(idPeregrinoOptional.get());
+					return nuevoPeregrino;
+				} else {
+					JOptionPane.showMessageDialog(null, "Error al insertar correctamente");
+				}
+
+		} while (pec.nombrePeregrinoExiste(nombre));
+		return null;
+	}
+	
+	////////////////////////////////////////////////////////////////////////////////
+	//////                    SECCIÓN CARNETS                                 //////                                                    
+	//////                                                                   //////
+	///////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * Modifica los datos de un carnet existente en el sistema.
+	 * 
+	 * @param carnet el objeto Carnet que contiene los datos actualizados.
+	 * @return true si el carnet fue modificado exitosamente, false en caso contrario.
+	 */
 	public boolean modificarCarnet(Carnet carnet) {
 		CarnetsController c = new CarnetsController();
 		return c.modificarCarnet(carnet);
 	}
-
-	public Optional<Long> insertarEstancia(Estancia estancia) {
-		EstanciasController e = new EstanciasController();
-		return e.insertarEstancia(estancia);
-	}
-
-	public String mostrarInformacionParada(Parada parada) {
-		return "Parada:\nID: " + parada.getId() + "\nNombre: " + parada.getNombre() + "\nRegión: " + parada.getRegion()
-				+ "\nResponsable: " + parada.getResponsable();
-	}
 	
+	/**
+	 * Realiza el proceso de sellado del carnet de un peregrino en una parada específica.
+	 * Esto incluye registrar la parada en el carnet del peregrino, actualizar la distancia
+	 * recorrida y opcionalmente registrar una estancia en la parada.
+	 * 
+	 * @param parada la parada donde se realizará el sellado del carnet.
+	 */
 	public void sellarCarnet(Parada parada) {
 		Peregrino peregrino = null;
 		Estancia nuevaEstancia = null;
@@ -223,91 +295,158 @@ public class ControladorPrincipal {
 		}
 	}
 
-	public Peregrino registrarPeregrino() {
-		ParadasController pc = new ParadasController();
-		PeregrinosController pec = new PeregrinosController();
-		CarnetsController cc = new CarnetsController();
-		Peregrino nuevoPeregrino = null;
-		Carnet carnet = null;
-		String nombre;
-		String nombreUsuario;
-		do {
-			JOptionPane.showMessageDialog(null, "Formulario de registro de nuevo peregrino");
-
-			// Obtener datos del usuario
-			nombre = obtenerEntrada("Ingrese su nombre", "Nombre", false, false);
-			if (nombre == null)
-				return null;
-
-			nombreUsuario = obtenerEntrada("Ingrese su nombre de usuario", "Nombre de usuario", false, true);
-			if (nombreUsuario == null)
-				return null;
-
-			String contrasenia = obtenerEntrada("Ingrese su contraseña", "Contraseña", false, true);
-			if (contrasenia == null)
-				return null;
-
-			String nacionalidad = "";
-			do {
-				nacionalidad = mostrarPaises();
-				if (!validarPais(nacionalidad)) {
-					JOptionPane.showMessageDialog(null, "El país ingresado no es válido.");
-				}
-			} while (!validarPais(nacionalidad));
-
-			String parada = "";
-			do {
-				parada = obtenerEntrada(mostrarParadas(true), "Parada", false, false);
-				if (!pc.paradaExiste(parada)) {
-					JOptionPane.showMessageDialog(null, "La parada seleccionada no es válida.");
-				}
-			} while (!pc.paradaExiste(parada));
-
-			// Confirmar los datos
-			nuevoPeregrino = confirmarDatos(nombre, nombreUsuario, contrasenia, nacionalidad, parada);
-
-			do {
-				if (nuevoPeregrino == null) {
-					// Si la confirmación falla, pedir nuevos datos
-
-					nuevoPeregrino = obtenerDatosModificados(nombre, nombreUsuario, contrasenia, nacionalidad, parada);
-
-				}
-			} while (nuevoPeregrino == null);
-			if (!pec.nombrePeregrinoExiste(nombre)) {
-				Optional<Parada> paradaEncontradaOptional = pc.obtenerParadaPorNombre(parada);
-
-				Parada paradaEncontrada = null;
-				if (paradaEncontradaOptional.isPresent()) {
-					paradaEncontrada = paradaEncontradaOptional.get();
-				}
-				carnet = new Carnet(paradaEncontrada);
-				paradaEncontrada.getPeregrinos().add(nuevoPeregrino.getId());
-				Optional<Long> idCarnetOptional = cc.insertarCarnet(carnet);
-
-				if (idCarnetOptional.isPresent()) {
-					JOptionPane.showMessageDialog(null, "Carnet creado correctamente");
-					nuevoPeregrino.getCarnet().setId(idCarnetOptional.get());
-				} else {
-					JOptionPane.showMessageDialog(null, "Error al insertar el carnet");
-				}
-				Optional<Long> idPeregrinoOptional = pec.insertarPeregrino(nuevoPeregrino);
-
-				if (idPeregrinoOptional.isPresent()) {
-					JOptionPane.showMessageDialog(null, "Peregrino insertado correctamente");
-					nuevoPeregrino.setId(idPeregrinoOptional.get());
-					return nuevoPeregrino;
-				} else {
-					JOptionPane.showMessageDialog(null, "Error al insertar correctamente");
-				}
-			} else {
-				JOptionPane.showMessageDialog(null, "El peregrino ya existe", "Error", JOptionPane.ERROR_MESSAGE);
-			}
-
-		} while (pec.nombrePeregrinoExiste(nombre));
-		return null;
+	
+	////////////////////////////////////////////////////////////////////////////////
+	//////                    SECCIÓN USUARIOS                               //////                                                    
+	//////                                                                   //////
+	///////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * Valida las credenciales proporcionadas de un usuario.
+	 * 
+	 * @param nombre el nombre de usuario.
+	 * @param contrasenia la contraseña del usuario.
+	 * @return true si las credenciales son válidas, false en caso contrario.
+	 */
+	public boolean validarCredenciales(String nombre, String contrasenia) {
+		UsuariosController uc = new UsuariosController();
+		return uc.validarCredenciales(nombre, contrasenia);
 	}
 
+	/**
+	 * Inicia sesión en el sistema con las credenciales proporcionadas.
+	 * 
+	 * @param nombre el nombre de usuario.
+	 * @param contrasenia la contraseña del usuario.
+	 * @return un Optional que contiene el objeto Usuario si el inicio de sesión fue exitoso,
+	 *         o un Optional vacío si las credenciales son incorrectas.
+	 */
+	public Optional<Usuario> login(String nombre, String contrasenia) {
+		UsuariosController uc = new UsuariosController();
+		return uc.login(nombre, contrasenia);
+	}
+
+	/**
+	 * Inserta un nuevo usuario en el sistema.
+	 * 
+	 * @param u el objeto Usuario que contiene los datos del nuevo usuario.
+	 * @return un Optional que contiene el ID del usuario recién insertado si la operación fue exitosa,
+	 *         o un Optional vacío si ocurrió un error.
+	 */
+	public Optional<Long> insertarUsuario(Usuario u) {
+		UsuariosController uc = new UsuariosController();
+		return uc.insertarUsuario(u);
+	}
+	
+	////////////////////////////////////////////////////////////////////////////////
+	//////                    SECCIÓN PARADAS                                 //////                                                    
+	//////                                                                    //////
+	///////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * Obtiene la parada asociada al ID del usuario.
+	 * 
+	 * @param id el ID del usuario.
+	 * @return un Optional que contiene el objeto Parada si se encuentra la parada asociada,
+	 *         o un Optional vacío si no existe una parada asociada al ID del usuario.
+	 */
+	public Optional<Parada> obtenerParadaPorIdUsuario(Long id) {
+		ParadasController pc = new ParadasController();
+		return pc.obtenerParadaPorIdUsuario(id);
+	}
+
+	/**
+	 * Obtiene una lista de paradas visitadas por un peregrino específico.
+	 * 
+	 * @param idPeregrino el ID del peregrino.
+	 * @return una lista de objetos Parada que representan las paradas visitadas por el peregrino.
+	 */
+	public List<Parada> obtenerParadasPorIdPeregrino(Long idPeregrino) {
+		ParadasController pc = new ParadasController();
+		return pc.obtenerParadasPorIdPeregrino(idPeregrino);
+	}
+	
+	/**
+	 * Obtiene la parada asociada a un ID específico.
+	 * 
+	 * @param id el ID de la parada.
+	 * @return un Optional que contiene el objeto Parada si se encuentra la parada,
+	 *         o un Optional vacío si no existe una parada con el ID proporcionado.
+	 */
+	public Optional<Parada> obtenerParadaPorId(Long id) {
+		ParadasController pc = new ParadasController();
+		return pc.obtenerParadaPorId(id);
+	}
+	
+	/**
+	 * Verifica si una parada existe en el sistema.
+	 * 
+	 * @param nombre el nombre de la parada.
+	 * @return true si la parada existe, false en caso contrario.
+	 */
+	public boolean paradaExiste(String nombre, String region, boolean esAdmin) {
+		ParadasController pc = new ParadasController();
+		return pc.paradaExiste(nombre, region, esAdmin);
+	}
+	
+	/**
+	 * Registra una relación entre un peregrino y una parada con la fecha de visita.
+	 * 
+	 * @param idPeregrino el ID del peregrino.
+	 * @param idParada el ID de la parada.
+	 * @param fecha la fecha en que el peregrino visitó la parada.
+	 * @return un Optional que contiene el ID de la relación si la operación fue exitosa,
+	 *         o un Optional vacío si ocurrió un error.
+	 */
+	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada, LocalDate fecha) {
+		ParadasController pc = new ParadasController();
+		return pc.insertarPeregrinosParadas(idPeregrino, idParada, fecha);
+	}
+	
+	/**
+	 * Genera una cadena con información detallada de una parada.
+	 * 
+	 * @param parada el objeto Parada cuyos detalles se mostrarán.
+	 * @return una cadena con la información de la parada, incluyendo su ID, nombre, región y responsable.
+	 */
+	public String mostrarInformacionParada(Parada parada) {
+		return "Parada:\nID: " + parada.getId() + "\nNombre: " + parada.getNombre() + "\nRegión: " + parada.getRegion()
+				+ "\nResponsable: " + parada.getResponsable();
+	}
+	
+	
+	/**
+	 * Registra una nueva parada en el sistema.
+	 * 
+	 * @return true si el registro fue exitoso; false en caso contrario.
+	 */
+	public boolean registrarParada(Parada parada) {
+		ParadasController pc = new ParadasController();
+		if (pc.paradaExiste(parada.getNombre(), String.valueOf(parada.getRegion()), true)) {
+			JOptionPane.showMessageDialog(null, "La parada ya existe");
+			return false;
+		}
+
+		Optional<Long> idParadaInsertada = pc.insertarParada(parada);
+		if (idParadaInsertada.isPresent()) {
+			JOptionPane.showMessageDialog(null, "Parada registrada con éxito");
+			return true;
+		}
+
+		return false;
+	}
+	
+	/**
+	 * Muestra un menú para exportar información de una parada en un rango de fechas especificado.
+	 * 
+	 * <p>El método solicita al usuario que introduzca las fechas de inicio y fin para realizar la exportación, 
+	 * valida las fechas introducidas y, si son correctas, continúa con el proceso de exportación. Permite al 
+	 * usuario confirmar los datos antes de proceder, mostrando información sobre la parada y el rango de fechas.
+	 * Si el usuario decide continuar exportando, se ejecuta el proceso de exportación de estancias de peregrinos 
+	 * dentro del rango de fechas.</p>
+	 * 
+	 * @param parada el objeto {@code Parada} que representa la parada cuya información se desea exportar.
+	 */
 	public void mostrarMenuExportar(Parada parada) {
 		LocalDate fechaInicio;
 		LocalDate fechaFin;
@@ -341,111 +480,7 @@ public class ControladorPrincipal {
 			continuarExportando = mostrarEstanciasPeregrinos(fechaInicio, fechaFin, parada);
 		} while (continuarExportando );
 	}
-
-	/**
-	 * Muestra un JOptionPane con los datos introducidos por el usuario para que
-	 * este los confirme
-	 * 
-	 * @param nombre
-	 * @param contrasenia
-	 * @param nacionalidad
-	 * @param parada
-	 * @return Peregrino con los datos introducidos por el usuario
-	 */
-	private Peregrino confirmarDatos(String nombre, String nombreUsuario, String contrasenia, String nacionalidad,
-			String parada) {
-		UsuariosController uc = new UsuariosController();
-		ParadasController pc = new ParadasController();
-		String mensajeFormateado = String.format("Verifica que los datos son correctos \n" + "Nombre: %s \n"
-				+ "Contraseña: %s\n" + "Nacionalidad: %s\n" + "Parada actual: %s\n", nombre, contrasenia, nacionalidad,
-				parada);
-
-		int confirmacion = JOptionPane.showConfirmDialog(null, mensajeFormateado, "Confirma",
-				JOptionPane.YES_NO_OPTION);
-		if (confirmacion == JOptionPane.YES_OPTION) {
-			// Datos correctos --> Continuar
-			if (uc.usuarioExiste(nombreUsuario)) {
-				JOptionPane.showMessageDialog(null, "El usuario ya existe", "Error", JOptionPane.ERROR_MESSAGE);
-				return null;
-			} else {
-
-				Optional<Parada> paradaObjOptional = pc.obtenerParadaPorNombre(parada);
-				Parada paradaObj = paradaObjOptional.orElse(null);
-			//	Usuario u = new Usuario(nombreUsuario, contrasenia, "peregrino");
-				Usuario u = new Usuario(nombreUsuario, Perfil.peregrino);
-				u.setPassword(contrasenia);
-				Optional<Long> idUsuario = uc.insertarUsuario(u);
-				Long idUsuarioValue = -1L;
-				if (idUsuario.isPresent()) {
-					idUsuarioValue = idUsuario.orElse(null);
-				}
-
-				Peregrino nuevoPeregrino = new Peregrino(nombre, nacionalidad, new Carnet(paradaObj), idUsuarioValue);
-
-				return nuevoPeregrino;
-			}
-		}
-		return null; // Si el usuario cancela
-	}
-
-	/**
-	 * Vuelve a mostrar los formularios para que el usuario modifique sus datos,
-	 * solo se muestra si el usuario indica que los datos mostrados en
-	 * confirmarDatos no son correctos
-	 * 
-	 * @param nombre
-	 * @param contrasenia
-	 * @param nacionalidad
-	 * @param parada
-	 * @return Peregrino con los datos modificados
-	 */
-	private Peregrino obtenerDatosModificados(String nombre, String nombreUsuario, String contrasenia,
-			String nacionalidad, String parada) {
-		UsuariosController uc = new UsuariosController();
-		ParadasController pc = new ParadasController();
-		// Pide los nuevos datos al usuario
-		String nuevoNombre = obtenerEntrada("Ingrese su nuevo nombre", nombre, false, false);
-		if (nuevoNombre == null)
-			return null;
-
-		String nuevoNombreUsuario = obtenerEntrada("Ingrese su nuevo nombre de usuario", nombreUsuario, false, true);
-		if (nuevoNombreUsuario == null)
-			return null;
-
-		String nuevaContrasenia = obtenerEntrada("Ingrese su nueva contraseña", contrasenia, false, true);
-		if (nuevaContrasenia == null)
-			return null;
-
-		String nuevaNacionalidad = mostrarPaises();
-		if (nuevaNacionalidad == null)
-			return null;
-
-		String nuevaParada = obtenerEntrada(mostrarParadas(true), parada, false, false);
-		if (nuevaParada == null)
-			return null;
-
-		if (uc.usuarioExiste(nuevoNombreUsuario)) {
-			JOptionPane.showMessageDialog(null, "El usuario ya existe", "Error", JOptionPane.ERROR_MESSAGE);
-			return null;
-		} else {
-
-			Optional<Parada> paradaObjOptional = pc.obtenerParadaPorNombre(parada);
-			Parada paradaObj = paradaObjOptional.orElse(null);
-		//	Usuario u = new Usuario(nuevoNombreUsuario, nuevaContrasenia, "peregrino");
-			Usuario u = new Usuario(nuevoNombreUsuario, Perfil.peregrino);
-			u.setPassword(nuevaContrasenia);
-			Optional<Long> idUsuario = uc.insertarUsuario(u);
-			Long idUsuarioValue = -1L;
-			if (idUsuario.isPresent()) {
-				idUsuarioValue = idUsuario.orElse(null);
-			}
-			Peregrino nuevoPeregrino = new Peregrino(nuevoNombre, nuevaNacionalidad, new Carnet(paradaObj),
-					idUsuarioValue);
-			nuevoPeregrino.getParadas().add(paradaObj.getId());
-			paradaObj.getPeregrinos().add(nuevoPeregrino.getId());
-			return nuevoPeregrino;
-		}
-	}
+	
 
 	/**
 	 * Muestra las paradas registradas en el sistema.
@@ -453,7 +488,6 @@ public class ControladorPrincipal {
 	 * @param isPeregrino Si es true, muestra solo el nombre y región.
 	 * @return Lista de paradas formateada como cadena.
 	 */
-	@SuppressWarnings("unchecked")
 	public String mostrarParadas(boolean isPeregrino) {
 		ParadasController controladorParada = new ParadasController();
 		List<Parada> paradasLeidas = controladorParada.obtenerTodasParadas();
@@ -474,136 +508,17 @@ public class ControladorPrincipal {
 
 		return sb.toString();
 	}
-
+	
 	/**
-	 * Registra una nueva parada en el sistema.
+	 * Muestra una tabla interactiva con los peregrinos disponibles y permite al usuario
+	 * seleccionar el ID de un peregrino introduciéndolo en un campo de texto.
 	 * 
-	 * @return true si el registro fue exitoso; false en caso contrario.
-	 */
-	public boolean registrarParada(Parada parada) {
-		ParadasController pc = new ParadasController();
-		if (pc.paradaExiste(parada.getNombre())) {
-			JOptionPane.showMessageDialog(null, "La parada ya existe");
-			return false;
-		}
-
-		Optional<Long> idParadaInsertada = pc.insertarParada(parada);
-		if (idParadaInsertada.isPresent()) {
-			JOptionPane.showMessageDialog(null, "Parada registrada con éxito");
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean paradaExiste(String nombre) {
-		ParadasController pc = new ParadasController();
-		return pc.paradaExiste(nombre);
-	}
-
-	public boolean peregrinoExiste(Long id) {
-		PeregrinosController pc = new PeregrinosController();
-		return pc.peregrinoExiste(id);
-	}
-
-	public Optional<Long> insertarPeregrinosParadas(Long idPeregrino, Long idParada, LocalDate fecha) {
-		ParadasController pc = new ParadasController();
-		return pc.insertarPeregrinosParadas(idPeregrino, idParada, fecha);
-	}
-
-	/**
-	 * Muestra la lista de países disponibles cargada desde el archivo XML.
+	 * <p>Este método utiliza un panel con una tabla que muestra todos los peregrinos obtenidos
+	 * del controlador, y un campo de texto donde el usuario puede introducir el ID de un peregrino.</p>
 	 * 
-	 * @return ID del país seleccionado por el usuario o null si cancela
+	 * @return el ID del peregrino introducido como una cadena de texto si el usuario confirma la selección,
+	 *         o {@code null} si el usuario cancela la operación.
 	 */
-	public String mostrarPaises() {
-		try {
-			// Crear un parser
-			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			Document documento = builder.parse(new File("src/main/resources/paises.xml"));
-			documento.getDocumentElement().normalize();
-
-			// Crear una lista con todos los nodos país
-			NodeList paises = documento.getElementsByTagName("pais");
-			String[] columnas = { "ID", "País" };
-
-			DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0) {
-				@Override
-				public boolean isCellEditable(int row, int column) {
-					return false; // Evita que el usuario pueda editar las celdas de la tabla
-				}
-			};
-
-			// Rellenar el modelo con datos del archivo paises.xml
-			for (int i = 0; i < paises.getLength(); i++) {
-				Node pais = paises.item(i);
-				if (pais.getNodeType() == Node.ELEMENT_NODE) {
-					Element elemento = (Element) pais;
-					String id = getNodo("id", elemento);
-					String nombrePais = getNodo("nombre", elemento);
-					modeloTabla.addRow(new Object[] { id, nombrePais });
-				}
-			}
-
-			// Tabla
-			JTable tablaPaises = new JTable(modeloTabla);
-			tablaPaises.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-
-			JTextField inputField = new JTextField();
-			inputField.setColumns(10);
-
-			// Panel Tabla
-			JPanel panel = new JPanel(new BorderLayout(5, 5));
-			panel.add(new JScrollPane(tablaPaises), BorderLayout.CENTER);
-
-			// InputField para la inserción del ID
-			JPanel inputPanel = new JPanel(new BorderLayout(5, 5));
-			inputPanel.add(new JLabel("Introduce tu nacionalidad:"), BorderLayout.WEST);
-			inputPanel.add(inputField, BorderLayout.CENTER);
-			panel.add(inputPanel, BorderLayout.SOUTH);
-
-			// Añadir el panel principal a un JOptionPane.showConfirmDialog
-			int option = JOptionPane.showConfirmDialog(null, panel, "Países disponibles:", JOptionPane.OK_CANCEL_OPTION,
-					JOptionPane.INFORMATION_MESSAGE);
-
-			if (option == JOptionPane.OK_OPTION) {
-				return inputField.getText().trim();
-			} else {
-				return null; // cancelado
-			}
-
-		} catch (ParserConfigurationException | SAXException | IOException ex) {
-			System.err.println("Error: " + ex.getMessage());
-		}
-		return null;
-	}
-
-	/**
-	 * Valida si una nacionalidad es válida según los datos del archivo XML.
-	 * 
-	 * @param nacionalidad ID de la nacionalidad.
-	 * @return true si es válida; false en caso contrario.
-	 */
-	private boolean validarPais(String nacionalidad) {
-		try {
-			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			Document documento = builder.parse(new File("src/main/resources/paises.xml"));
-			documento.getDocumentElement().normalize();
-			NodeList paises = documento.getElementsByTagName("pais");
-
-			for (int i = 0; i < paises.getLength(); i++) {
-				Element elemento = (Element) paises.item(i);
-				String pais = getNodo("nombre", elemento);
-				if (pais.equalsIgnoreCase(nacionalidad)) {
-					return true;
-				}
-			}
-		} catch (ParserConfigurationException | SAXException | IOException ex) {
-			System.err.println("Error: " + ex.getMessage());
-		}
-		return false;
-	}
-
 	public String mostrarPeregrinos() {
 		PeregrinosController pec = new PeregrinosController();
 		List<Peregrino> listaPeregrinos = pec.obtenerTodosPeregrinos();
@@ -654,8 +569,22 @@ public class ControladorPrincipal {
 		}
 	}
 
-	// Mostrar estancias de peregrinos
-
+	
+	/**
+	 * Muestra una tabla interactiva con las estancias de los peregrinos en una parada específica
+	 * durante un rango de fechas, y permite exportar las estancias a un archivo XML.
+	 * 
+	 * <p>Este método genera una tabla con las estancias dentro del rango de fechas especificado,
+	 * incluyendo información del peregrino, fecha de estancia, y si es VIP. Además, permite
+	 * exportar la información a un archivo XML y brinda la opción de seleccionar otras fechas
+	 * para repetir el proceso.</p>
+	 * 
+	 * @param fechaInicio la fecha de inicio del rango.
+	 * @param fechaFin la fecha de fin del rango.
+	 * @param parada la parada cuyas estancias se desean visualizar y exportar.
+	 * @return {@code true} si el usuario decide seleccionar otras fechas y repetir el proceso;
+	 *         {@code false} si el usuario cancela la operación.
+	 */
 	public boolean mostrarEstanciasPeregrinos(LocalDate fechaInicio, LocalDate fechaFin, Parada parada) {
 		ExportarEstanciasPeregrinosXML exportarEstancias = new ExportarEstanciasPeregrinosXML(fechaInicio, fechaFin,
 				parada);
@@ -733,6 +662,168 @@ public class ControladorPrincipal {
 		return ret;
 	}
 
+
+
+	////////////////////////////////////////////////////////////////////////////////
+	//////                    SECCIÓN ESTANCIAS                               //////                                                    
+	//////                                                                    //////
+	///////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * Obtiene una lista de estancias asociadas a un peregrino específico mediante su ID.
+	 * 
+	 * <p>Este método consulta al controlador de estancias para recuperar todas las estancias
+	 * que pertenecen al peregrino identificado por el ID proporcionado.</p>
+	 * 
+	 * @param idPeregrino el ID del peregrino cuyas estancias se desean obtener.
+	 * @return una lista de objetos {@link Estancia} correspondientes al peregrino con el ID dado.
+	 */
+	public List<Estancia> obtenerEstanciasPorIdPeregrino(Long idPeregrino) {
+		EstanciasController ec = new EstanciasController();
+		return ec.obtenerEstanciasPorIdPeregrino(idPeregrino);
+	}
+
+	/**
+	 * Obtiene una lista de estancias asociadas a una parada específica mediante su ID.
+	 * 
+	 * <p>Este método consulta al controlador de estancias para recuperar todas las estancias
+	 * que están asociadas con la parada identificada por el ID proporcionado.</p>
+	 * 
+	 * @param idParada el ID de la parada cuyas estancias se desean obtener.
+	 * @return una lista de objetos {@link Estancia} correspondientes a la parada con el ID dado.
+	 */
+	public List<Estancia> obtenerEstanciasPorIdParada(Long idParada) {
+		EstanciasController ec = new EstanciasController();
+		return ec.obtenerEstanciasPorIdParada(idParada);
+	}
+	
+	/**
+	 * Inserta una nueva estancia en el sistema.
+	 * 
+	 * <p>Este método solicita al controlador de estancias que registre una nueva estancia
+	 * en la base de datos o sistema, devolviendo el ID de la estancia recién insertada.</p>
+	 * 
+	 * @param estancia el objeto {@link Estancia} que representa la estancia a insertar.
+	 * @return un {@link Optional} que contiene el ID de la nueva estancia si la inserción es exitosa,
+	 *         o un valor vacío si ocurre algún error.
+	 */
+	public Optional<Long> insertarEstancia(Estancia estancia) {
+		EstanciasController e = new EstanciasController();
+		return e.insertarEstancia(estancia);
+	}
+	
+	
+	////////////////////////////////////////////////////////////////////////////////
+	//////                    SECCIÓN ENTRADA DATOS                            /////                                                    
+	//////                                                                    //////
+	///////////////////////////////////////////////////////////////////////////////
+
+
+	/**
+	 * Muestra un JOptionPane con los datos introducidos por el usuario para que
+	 * este los confirme
+	 * 
+	 * @param nombre
+	 * @param contrasenia
+	 * @param nacionalidad
+	 * @param parada
+	 * @return Peregrino con los datos introducidos por el usuario
+	 */
+	private Peregrino confirmarDatos(String nombre, String nombreUsuario, String contrasenia, String nacionalidad,
+			String parada) {
+		UsuariosController uc = new UsuariosController();
+		ParadasController pc = new ParadasController();
+		String mensajeFormateado = String.format("Verifica que los datos son correctos \n" + "Nombre: %s \n"
+				+ "Contraseña: %s\n" + "Nacionalidad: %s\n" + "Parada actual: %s\n", nombre, contrasenia, nacionalidad,
+				parada);
+
+		int confirmacion = JOptionPane.showConfirmDialog(null, mensajeFormateado, "Confirma",
+				JOptionPane.YES_NO_OPTION);
+		if (confirmacion == JOptionPane.YES_OPTION) {
+			// Datos correctos --> Continuar
+			if (uc.usuarioExiste(nombreUsuario)) {
+				JOptionPane.showMessageDialog(null, "El usuario ya existe", "Error", JOptionPane.ERROR_MESSAGE);
+				return null;
+			} else {
+
+				Optional<Parada> paradaObjOptional = pc.obtenerParadaPorNombre(parada);
+				Parada paradaObj = paradaObjOptional.orElse(null);
+			
+				Usuario u = new Usuario(nombreUsuario, Perfil.peregrino);
+				u.setPassword(contrasenia);
+				Optional<Long> idUsuario = uc.insertarUsuario(u);
+				Long idUsuarioValue = -1L;
+				if (idUsuario.isPresent()) {
+					idUsuarioValue = idUsuario.orElse(null);
+				}
+
+				Peregrino nuevoPeregrino = new Peregrino(nombre, nacionalidad, new Carnet(paradaObj), idUsuarioValue);
+
+				return nuevoPeregrino;
+			}
+		}
+		return null; // Si el usuario cancela
+	}
+
+	/**
+	 * Vuelve a mostrar los formularios para que el usuario modifique sus datos,
+	 * solo se muestra si el usuario indica que los datos mostrados en
+	 * confirmarDatos no son correctos
+	 * 
+	 * @param nombre
+	 * @param contrasenia
+	 * @param nacionalidad
+	 * @param parada
+	 * @return Peregrino con los datos modificados
+	 */
+	private Peregrino obtenerDatosModificados(String nombre, String nombreUsuario, String contrasenia,
+			String nacionalidad, String parada) {
+		UsuariosController uc = new UsuariosController();
+		ParadasController pc = new ParadasController();
+		// Pide los nuevos datos al usuario
+		String nuevoNombre = obtenerEntrada("Ingrese su nuevo nombre", nombre, false, false);
+		if (nuevoNombre == null)
+			return null;
+
+		String nuevoNombreUsuario = obtenerEntrada("Ingrese su nuevo nombre de usuario", nombreUsuario, false, true);
+		if (nuevoNombreUsuario == null)
+			return null;
+
+		String nuevaContrasenia = obtenerEntrada("Ingrese su nueva contraseña", contrasenia, false, true);
+		if (nuevaContrasenia == null)
+			return null;
+
+		String nuevaNacionalidad = mostrarPaises();
+		if (nuevaNacionalidad == null)
+			return null;
+
+		String nuevaParada = obtenerEntrada(mostrarParadas(true), parada, false, false);
+		if (nuevaParada == null)
+			return null;
+
+		if (uc.usuarioExiste(nuevoNombreUsuario)) {
+			JOptionPane.showMessageDialog(null, "El usuario ya existe", "Error", JOptionPane.ERROR_MESSAGE);
+			return null;
+		} else {
+
+			Optional<Parada> paradaObjOptional = pc.obtenerParadaPorNombre(parada);
+			Parada paradaObj = paradaObjOptional.orElse(null);
+		//	Usuario u = new Usuario(nuevoNombreUsuario, nuevaContrasenia, "peregrino");
+			Usuario u = new Usuario(nuevoNombreUsuario, Perfil.peregrino);
+			u.setPassword(nuevaContrasenia);
+			Optional<Long> idUsuario = uc.insertarUsuario(u);
+			Long idUsuarioValue = -1L;
+			if (idUsuario.isPresent()) {
+				idUsuarioValue = idUsuario.orElse(null);
+			}
+			Peregrino nuevoPeregrino = new Peregrino(nuevoNombre, nuevaNacionalidad, new Carnet(paradaObj),
+					idUsuarioValue);
+			nuevoPeregrino.getParadas().add(paradaObj.getId());
+			paradaObj.getPeregrinos().add(nuevoPeregrino.getId());
+			return nuevoPeregrino;
+		}
+	}
+	
 	/**
 	 * Valida un String según los criterios establecidos (no vacío, sin espacios
 	 * iniciales, etc.).
@@ -798,6 +889,17 @@ public class ControladorPrincipal {
 		return entrada.trim();
 	}
 
+	/**
+	 * Solicita al usuario que ingrese una fecha mediante un cuadro de entrada de texto.
+	 * 
+	 * <p>Este método muestra un cuadro de diálogo en el que el usuario debe introducir una fecha
+	 * en el formato "yyyy-MM-dd". Si la entrada no es válida o está vacía, se muestra un mensaje de error
+	 * y se repite la solicitud hasta obtener una entrada válida.</p>
+	 * 
+	 * @param mensaje el mensaje que se mostrará en el cuadro de entrada, solicitando al usuario que ingrese la fecha.
+	 * @param titulo el título del cuadro de diálogo que contiene la solicitud de la fecha.
+	 * @return la fecha introducida por el usuario, como un objeto {@link LocalDate}.
+	 */
 	public LocalDate obtenerEntradaFecha(String mensaje, String titulo) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		LocalDate fecha = null;
@@ -822,6 +924,16 @@ public class ControladorPrincipal {
 		return fecha;
 	}
 
+	/**
+	 * Valida que la fecha de inicio no sea posterior a la fecha de fin.
+	 * 
+	 * <p>Este método verifica que la fecha de inicio no sea posterior a la fecha de fin. Si es el caso,
+	 * se muestra un mensaje de error y se retorna {@code false}. Si la validación es correcta, se retorna {@code true}.</p>
+	 * 
+	 * @param fechaInicio la fecha de inicio a validar.
+	 * @param fechaFin la fecha de fin a validar.
+	 * @return {@code true} si la fecha de inicio no es posterior a la fecha de fin; {@code false} en caso contrario.
+	 */
 	public boolean validarFechas(LocalDate fechaInicio, LocalDate fechaFin) {
 		if (fechaInicio.isAfter(fechaFin)) {
 			JOptionPane.showMessageDialog(null,
@@ -832,6 +944,113 @@ public class ControladorPrincipal {
 		return true;
 	}
 
+		
+
+	////////////////////////////////////////////////////////////////////////////////
+	//////                    SECCIÓN PAISES                            	   /////                                                    
+	//////                                                                    //////
+	///////////////////////////////////////////////////////////////////////////////
+	
+	
+	/**
+	 * Muestra la lista de países disponibles cargada desde el archivo XML.
+	 * 
+	 * @return ID del país seleccionado por el usuario o null si cancela
+	 */
+	public String mostrarPaises() {
+		try {
+			// Crear un parser
+			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document documento = builder.parse(new File("src/main/resources/paises.xml"));
+			documento.getDocumentElement().normalize();
+
+			// Crear una lista con todos los nodos país
+			NodeList paises = documento.getElementsByTagName("pais");
+			String[] columnas = { "ID", "País" };
+
+			DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0) {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public boolean isCellEditable(int row, int column) {
+					return false; // Evita que el usuario pueda editar las celdas de la tabla
+				}
+			};
+
+			// Rellenar el modelo con datos del archivo paises.xml
+			for (int i = 0; i < paises.getLength(); i++) {
+				Node pais = paises.item(i);
+				if (pais.getNodeType() == Node.ELEMENT_NODE) {
+					Element elemento = (Element) pais;
+					String id = getNodo("id", elemento);
+					String nombrePais = getNodo("nombre", elemento);
+					modeloTabla.addRow(new Object[] { id, nombrePais });
+				}
+			}
+
+			// Tabla
+			JTable tablaPaises = new JTable(modeloTabla);
+			tablaPaises.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+			JTextField inputField = new JTextField();
+			inputField.setColumns(10);
+
+			// Panel Tabla
+			JPanel panel = new JPanel(new BorderLayout(5, 5));
+			panel.add(new JScrollPane(tablaPaises), BorderLayout.CENTER);
+
+			// InputField para la inserción del ID
+			JPanel inputPanel = new JPanel(new BorderLayout(5, 5));
+			inputPanel.add(new JLabel("Introduce tu nacionalidad:"), BorderLayout.WEST);
+			inputPanel.add(inputField, BorderLayout.CENTER);
+			panel.add(inputPanel, BorderLayout.SOUTH);
+
+			// Añadir el panel principal a un JOptionPane.showConfirmDialog
+			int option = JOptionPane.showConfirmDialog(null, panel, "Países disponibles:", JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.INFORMATION_MESSAGE);
+
+			if (option == JOptionPane.OK_OPTION) {
+				return inputField.getText().trim();
+			} else {
+				return null; // cancelado
+			}
+
+		} catch (ParserConfigurationException | SAXException | IOException ex) {
+			System.err.println("Error: " + ex.getMessage());
+		}
+		return null;
+	}
+
+	/**
+	 * Valida si una nacionalidad es válida según los datos del archivo XML.
+	 * 
+	 * @param nacionalidad ID de la nacionalidad.
+	 * @return true si es válida; false en caso contrario.
+	 */
+	private boolean validarPais(String nacionalidad) {
+		try {
+			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			Document documento = builder.parse(new File("src/main/resources/paises.xml"));
+			documento.getDocumentElement().normalize();
+			NodeList paises = documento.getElementsByTagName("pais");
+
+			for (int i = 0; i < paises.getLength(); i++) {
+				Element elemento = (Element) paises.item(i);
+				String pais = getNodo("nombre", elemento);
+				if (pais.equalsIgnoreCase(nacionalidad)) {
+					return true;
+				}
+			}
+		} catch (ParserConfigurationException | SAXException | IOException ex) {
+			System.err.println("Error: " + ex.getMessage());
+		}
+		return false;
+	}
+
+	
 	/**
 	 * Obtiene el valor de un nodo XML específico.
 	 * 

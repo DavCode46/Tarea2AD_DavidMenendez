@@ -1,23 +1,20 @@
 package davidmb.main;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.time.LocalDate;
+
+
 import java.util.Optional;
-import java.util.Properties;
-import java.util.logging.Logger;
+
 
 import javax.swing.JOptionPane;
 
 import davidmb.controllers.ControladorPrincipal;
 import davidmb.controllers.ExportarCarnetXML;
-import davidmb.controllers.ExportarEstanciasPeregrinosXML;
-import davidmb.models.Estancia;
+
 import davidmb.models.Parada;
 import davidmb.models.Peregrino;
 import davidmb.models.Perfil;
 import davidmb.models.Usuario;
-import davidmb.utils.MyLogger;
+
 
 /**
  * Clase principal del sistema de gestión de peregrinos y paradas. Proporciona
@@ -35,7 +32,7 @@ public class Principal {
 	 * @param args Argumentos de la línea de comandos (no se utilizan).
 	 */
 	public static void main(String[] args) {
-		MyLogger.init();
+		
 		mostrarMenu();
 	}
 
@@ -50,17 +47,7 @@ public class Principal {
 
 		Peregrino p = null;
 		Parada parada = null;
-		Properties prop = new Properties();
-
-		try (FileInputStream input = new FileInputStream("src/main/resources/application.properties")) {
-			prop.load(input);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		String usuarioAdmin = prop.getProperty("usuarioAdmin");
-		String contraseniaAdmin = prop.getProperty("passwordAdmin");
+			
 		String opcion = "";
 
 		do {
@@ -145,7 +132,6 @@ public class Principal {
 			case "2": {
 				// Registrar peregrino
 				p = sistema.registrarPeregrino();
-				System.out.println(p);
 
 				if (p != null) {
 					userActivo = new Usuario(p.getNombre(), Perfil.peregrino);
@@ -199,6 +185,8 @@ public class Principal {
 	private static void mostrarOpcionesPeregrino(Peregrino p, ControladorPrincipal sistema) {
 		ExportarCarnetXML exportar = new ExportarCarnetXML();
 		String opcion = "";
+		JOptionPane.showMessageDialog(null,
+				"Bienvenido " + p.getNombre() + "!\nPerfil: " + userActivo.getPerfil());
 		do {
 			String menu = "1. Exportar carnet\n" + "0. Cerrar sesión\n";
 
@@ -254,7 +242,7 @@ public class Principal {
 	private static void mostrarOpcionesAdmin(ControladorPrincipal sistema, String nombreUsuario) {
 		String opcion = "";
 		JOptionPane.showMessageDialog(null,
-				"Bienvenido " + nombreUsuario + "!\nPerfil: " + userActivo.getPerfil() + "\nID: " + userActivo.getId());
+				"Bienvenido " + nombreUsuario + "!\nPerfil: " + userActivo.getPerfil() + "\nID Usuario:" + userActivo.getId());
 		do {
 			String menu = "1. Registrar parada\n" + "0. Cerrar sesión\n";
 			opcion = sistema.obtenerEntrada(menu, "Selecciona una opción", true, false);
@@ -275,7 +263,7 @@ public class Principal {
 					return;
 				}
 
-				if (sistema.paradaExiste(nombreParada)) {
+				if (sistema.paradaExiste(nombreParada, String.valueOf(region), true)) {
 					JOptionPane.showMessageDialog(null, "La parada ya existe.");
 					continue;
 				}
@@ -342,7 +330,7 @@ public class Principal {
 	public static void mostrarOpcionesParada(Parada parada, ControladorPrincipal sistema) {
 	
 		JOptionPane.showMessageDialog(null, "Bienvenido " + parada.getNombre() + "!\nPerfil: " + userActivo.getPerfil()
-				+ "\nID: " + userActivo.getId());
+				+ "\nID Usuario:" + userActivo.getId());
 		String opcion = "";
 		MENU: do {
 			String menu = "1. Exportar estancias\n" + "2. Sellar carnet\n" + "0. Cerrar sesión\n";
