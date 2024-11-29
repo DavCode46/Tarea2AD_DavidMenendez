@@ -117,9 +117,12 @@ public class ParadasService {
     }
 
     /**
-     * Verifica si una parada existe en el sistema por su nombre.
+     * Verifica si una parada existe en el sistema por su nombre en caso de ser un peregrino
+     * y por su nombre y región en caso de ser admin
      * 
      * @param nombre El nombre de la parada que se desea verificar.
+     * @param region La región de la parada
+     * @esAdmin boolean para identificar si es un admin o no
      * @return {@code true} si la parada existe, {@code false} si no existe.
      */
     public boolean paradaExiste(String nombre, String region, boolean esAdmin) {

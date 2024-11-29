@@ -247,7 +247,7 @@ public class ControladorPrincipal {
 					JOptionPane.INFORMATION_MESSAGE);
 			return;
 		} 
-		System.out.println(parada.getId());
+		
 		Optional<Long> idPeregrinosParadas = insertarPeregrinosParadas(idPeregrinoLong, parada.getId(), LocalDate.now());
 		
 		peregrino.getParadas().add(parada.getId());
@@ -382,6 +382,8 @@ public class ControladorPrincipal {
 	 * Verifica si una parada existe en el sistema.
 	 * 
 	 * @param nombre el nombre de la parada.
+	 * @param region la región de la parada
+	 * @param esAdmin boolean para verificar si es admin o no
 	 * @return true si la parada existe, false en caso contrario.
 	 */
 	public boolean paradaExiste(String nombre, String region, boolean esAdmin) {
@@ -467,9 +469,7 @@ public class ControladorPrincipal {
 
 					continue;
 				} else if (confirmacion == JOptionPane.YES_OPTION) {
-					int cont = 1;
-					System.out.println("Entro " + cont);
-					cont++;
+					
 					if (validarFechas(fechaInicio, fechaFin)) {
 						fechasCorrectas = true;
 					} 
@@ -808,7 +808,7 @@ public class ControladorPrincipal {
 
 			Optional<Parada> paradaObjOptional = pc.obtenerParadaPorNombre(parada);
 			Parada paradaObj = paradaObjOptional.orElse(null);
-		//	Usuario u = new Usuario(nuevoNombreUsuario, nuevaContrasenia, "peregrino");
+		
 			Usuario u = new Usuario(nuevoNombreUsuario, Perfil.peregrino);
 			u.setPassword(nuevaContrasenia);
 			Optional<Long> idUsuario = uc.insertarUsuario(u);

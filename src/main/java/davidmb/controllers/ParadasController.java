@@ -139,11 +139,14 @@ public class ParadasController {
     }
 
     /**
-     * Verifica si una parada existe en el sistema dado su nombre.
+     * Verifica si una parada existe en el sistema dado su nombre en caso de ser peregrino 
+     * o su nombre y región en caso de ser admin.
      * 
      * <p>Este método permite verificar si una parada con un nombre específico existe en el sistema.</p>
      * 
      * @param nombre el nombre de la parada a verificar.
+     * @param region La regrión de la parada a verificar
+     * @esAdmin boolean para verificar si es admin o no
      * @return {@code true} si la parada existe, {@code false} si no.
      */
     public boolean paradaExiste(String nombre, String region, boolean esAdmin) {

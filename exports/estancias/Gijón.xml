@@ -14,8 +14,14 @@
         </estancia>
         <estancia>
             <id>8</id>
-            <peregrino>Pedro Gómez</peregrino>
-            <fecha>2024-11-28</fecha>
+            <peregrino>nuevo peregrino</peregrino>
+            <fecha>2024-11-29</fecha>
+            <vip>Sí</vip>
+        </estancia>
+        <estancia>
+            <id>11</id>
+            <peregrino>dos</peregrino>
+            <fecha>2024-11-29</fecha>
             <vip>Sí</vip>
         </estancia>
     </estancias>

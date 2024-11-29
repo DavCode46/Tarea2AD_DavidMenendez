@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<carnet>
+    <id>6</id>
+    <fechaexp>2024-11-29</fechaexp>
+    <expedidoen>Santiago</expedidoen>
+    <peregrino>
+        <nombre>nuevo peregrino</nombre>
+        <nacionalidad>jamaica</nacionalidad>
+    </peregrino>
+    <hoy>2024-11-29</hoy>
+    <distanciatotal>315,0</distanciatotal>
+    <paradas>
+        <parada>
+            <orden>1</orden>
+            <nombre>Gijón</nombre>
+            <region>N</region>
+        </parada>
+    </paradas>
+    <estancias>
+        <estancia>
+            <id>8</id>
+            <fecha>2024-11-29</fecha>
+            <parada>Gijón</parada>
+            <vip>Sí</vip>
+        </estancia>
+    </estancias>
+</carnet>

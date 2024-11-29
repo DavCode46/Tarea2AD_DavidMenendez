@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<parada>
+    <id>7</id>
+    <parada>ultima</parada>
+    <region>u</region>
+    <fecha-inicio>2020-11-11</fecha-inicio>
+    <fecha-fin>2025-11-11</fecha-fin>
+    <estancias>
+        <estancia>
+            <id>12</id>
+            <peregrino>ultimo</peregrino>
+            <fecha>2024-11-29</fecha>
+            <vip>Sí</vip>
+        </estancia>
+    </estancias>
+</parada>

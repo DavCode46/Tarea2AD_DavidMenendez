@@ -414,17 +414,19 @@ public class ParadaDAO {
 	}
 
 	/**
-	 * Actualiza una parada en la base de datos.
+	 * Comprueba si una parada ya existe.
 	 * 
 	 * <p>
-	 * Este método actualiza una parada en la base de datos y devuelve el ID de la
-	 * parada actualizada.
+	 * Este método comprueba si una parada ya existe, si es el administrador tiene en cuenta
+	 * el nombre y la región, esto permite crear paradas con mismo nombre pero en diferentes regiones
+	 * si no es admin solo se tiene en cuenta el nombre, para validar qeu el usuario introduce una parada existente
+	 * al registrarse como peregrino.
 	 * </p>
 	 * 
-	 * @param parada la parada que se desea actualizar.
-	 * @return un {@link Optional} que contiene el ID de la parada actualizada si la
-	 *         operación es exitosa, o un {@link Optional} vacío si la actualización
-	 *         falla.
+	 * @param nombre el nombre de la parada
+	 * @param region la región de la parada
+	 * @param esAdmin boolean para comprobar si el método se utiliza en un admin o un peregrino
+	 * @return boolean true si la parada existe o false en caso contrario.
 	 */
 	public boolean paradaExiste(String nombre, String region, boolean esAdmin) {
 		boolean existe = false;

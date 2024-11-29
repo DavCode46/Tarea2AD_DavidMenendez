@@ -3,8 +3,8 @@
     <id>2</id>
     <parada>Oviedo</parada>
     <region>N</region>
-    <fecha-inicio>2020-10-10</fecha-inicio>
-    <fecha-fin>2025-10-10</fecha-fin>
+    <fecha-inicio>2020-11-11</fecha-inicio>
+    <fecha-fin>2025-11-11</fecha-fin>
     <estancias>
         <estancia>
             <id>2</id>
@@ -17,6 +17,12 @@
             <peregrino>Laura García</peregrino>
             <fecha>2024-02-02</fecha>
             <vip>No</vip>
+        </estancia>
+        <estancia>
+            <id>10</id>
+            <peregrino>Pedro Gómez</peregrino>
+            <fecha>2024-11-29</fecha>
+            <vip>Sí</vip>
         </estancia>
     </estancias>
 </parada>
